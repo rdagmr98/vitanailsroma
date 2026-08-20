@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rdagmr98.github.io/vitanailsroma/sitemap.xml

@@ -3,8 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Vita Nails Roma — onicotecnica, manicure russa, pedicure e podologia a Roma. Bellezza, cura, professionalità.">
-  <title>Vita Nails Roma — Onicotecnica &amp; Manicure Russa</title>
+  <meta name="description" content="Vita Nails Roma — nail studio a Roma: manicure russa, onicotecnica, pedicure e podologia. Materiali ipoallergenici. Prenota su Instagram @vita_nails_roma.">
+  <meta name="keywords" content="manicure roma, unghie roma, manicure russa roma, pedicure roma, onicotecnica roma, nail studio roma, podologia roma, semipermanente roma">
+  <meta name="author" content="Vita Nails Roma">
+  <link rel="canonical" href="https://rdagmr98.github.io/vitanailsroma/">
+  <title>Vita Nails Roma — Manicure Russa, Onicotecnica &amp; Pedicure a Roma</title>
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://rdagmr98.github.io/vitanailsroma/">
+  <meta property="og:title" content="Vita Nails Roma — Manicure Russa &amp; Onicotecnica a Roma">
+  <meta property="og:description" content="Studio nails a Roma: manicure russa, pedicure, podologia. Materiali ipoallergenici. Prenota su Instagram @vita_nails_roma.">
+  <meta property="og:image" content="https://rdagmr98.github.io/vitanailsroma/vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg">
+  <meta property="og:locale" content="it_IT">
+  <meta property="og:locale:alternate" content="ru_RU">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BeautySalon",
+    "name": "Vita Nails Roma",
+    "description": "Onicotecnica a Roma: manicure russa, pedicure, podologia e corsi. Materiali ipoallergenici.",
+    "url": "https://rdagmr98.github.io/vitanailsroma/",
+    "image": "https://rdagmr98.github.io/vitanailsroma/vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg",
+    "address": { "@type": "PostalAddress", "addressLocality": "Roma", "addressRegion": "Lazio", "addressCountry": "IT" },
+    "sameAs": ["https://www.instagram.com/vita_nails_roma/", "https://www.threads.com/@vita_nails_roma"],
+    "priceRange": "€€",
+    "knowsAbout": ["manicure russa", "pedicure", "onicotecnica", "podologia", "semipermanente"]
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -72,6 +97,14 @@
       color: var(--ink-soft); transition: color var(--transition);
     }
     .nav-links a:hover { color: var(--ink); }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+    .lang-toggle { display: flex; gap: 0.2rem; }
+    .lang-btn {
+      padding: 0.32rem 0.55rem; border: 1.5px solid rgba(44,38,36,0.15);
+      background: transparent; border-radius: 6px; font-size: 0.72rem; font-weight: 500;
+      cursor: pointer; letter-spacing: 0.05em; font-family: inherit; color: var(--ink-soft);
+    }
+    .lang-btn.active { background: var(--charcoal); color: var(--ivory); border-color: var(--charcoal); }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center;
@@ -281,6 +314,20 @@
       background: var(--cream); font-family: inherit; font-size: 0.95rem;
     }
     .form-group textarea { min-height: 110px; resize: vertical; }
+    .msg-preview {
+      margin-top: 1rem; padding: 1rem; border-radius: 12px;
+      background: var(--cream); border: 1.5px solid rgba(44,38,36,0.1);
+    }
+    .msg-preview[hidden] { display: none; }
+    .msg-preview-label { font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 0.4rem; }
+    .msg-preview-text {
+      font-size: 0.92rem; white-space: pre-wrap; padding: 0.75rem;
+      background: var(--ivory); border-radius: 8px; margin-bottom: 0.6rem; line-height: 1.5;
+    }
+    .msg-preview-hint { font-size: 0.78rem; color: var(--ink-soft); margin-bottom: 0.75rem; }
+    .footer-credit { margin-top: 0.6rem; font-size: 0.78rem; color: rgba(255,250,245,0.45); }
+    .footer-credit a { color: rgba(255,250,245,0.65); text-decoration: underline; text-underline-offset: 2px; }
+    .footer-credit a:hover { color: var(--gold-soft); }
 
     footer { background: #1f1b19; color: rgba(255,250,245,0.7); padding: 2.6rem 0 1.6rem; }
     .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1.6rem; margin-bottom: 1.6rem; }
@@ -302,7 +349,12 @@
       .nav-links.open { transform: none; }
       .menu-toggle { display: grid; }
       .hero-grid, .about-grid, .cards, .price-cols, .corsi-box, .contact-grid, .footer-grid { grid-template-columns: 1fr; }
-      .stack-3d { height: 420px; order: -1; }
+      .stack-3d { height: 400px; order: -1; margin-bottom: 5rem; }
+      .p3 { left: 50%; margin-left: -60px; bottom: 10%; }
+      .badge-3d {
+        right: auto; left: 50%; transform: translateX(-50%);
+        bottom: -4.2rem; animation: none; max-width: min(280px, 92%);
+      }
       .form-row { grid-template-columns: 1fr; }
       .carousel-wrap { height: min(460px, 68vh); }
     }
@@ -318,14 +370,20 @@
     <header id="header">
       <div class="container nav">
         <a class="logo" href="#">Vita <span>Nails</span></a>
-        <button class="menu-toggle" id="menuToggle" aria-label="Apri menu"><span></span></button>
+        <div class="nav-right">
+          <div class="lang-toggle" role="group" aria-label="Lingua">
+            <button type="button" class="lang-btn active" data-lang="it">IT</button>
+            <button type="button" class="lang-btn" data-lang="ru">RU</button>
+          </div>
+          <button class="menu-toggle" id="menuToggle" aria-label="Apri menu"><span></span></button>
+        </div>
         <ul class="nav-links" id="navLinks">
-          <li><a href="#chi-sono">Chi sono</a></li>
-          <li><a href="#trattamenti">Trattamenti</a></li>
-          <li><a href="#lavori">Lavori</a></li>
-          <li><a href="#listino">Listino</a></li>
-          <li><a href="#corsi">Corsi</a></li>
-          <li><a href="#contatti" class="btn btn-primary">Prenota</a></li>
+          <li><a href="#chi-sono" data-i18n="nav.about">Chi sono</a></li>
+          <li><a href="#trattamenti" data-i18n="nav.services">Trattamenti</a></li>
+          <li><a href="#lavori" data-i18n="nav.portfolio">Lavori</a></li>
+          <li><a href="#listino" data-i18n="nav.prices">Listino</a></li>
+          <li><a href="#corsi" data-i18n="nav.courses">Corsi</a></li>
+          <li><a href="#contatti" class="btn btn-primary" data-i18n="nav.book">Prenota</a></li>
         </ul>
       </div>
     </header>
@@ -333,20 +391,20 @@
     <section class="hero">
       <div class="container hero-grid">
         <div class="fade-in">
-          <span class="eyebrow">Onicotecnica · Roma · @vita_nails_roma</span>
-          <h1>Manicure russa, dettagli che <em>restano</em></h1>
-          <p class="hero-text">
+          <span class="eyebrow" data-i18n="hero.eyebrow">Onicotecnica · Roma · @vita_nails_roma</span>
+          <h1 data-i18n-html="hero.title">Manicure russa, dettagli che <em>restano</em></h1>
+          <p class="hero-text" data-i18n="hero.text">
             Sono Vita. Studio nails a Roma: tecnica russa, materiali ipoallergenici e cura delle unghie
             fino alla pedicure e alla podologia. Bellezza, cura, professionalità — in ogni appuntamento.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">Prenota in Direct</a>
-            <a class="btn btn-outline" href="#listino">Guarda il listino</a>
+            <a class="btn btn-primary" href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener" data-i18n="hero.btnDirect">Prenota in Direct</a>
+            <a class="btn btn-outline" href="#listino" data-i18n="hero.btnPrices">Guarda il listino</a>
           </div>
           <div class="hero-stats">
-            <div class="stat"><strong>Roma</strong><span>studio nails</span></div>
-            <div class="stat"><strong>45€</strong><span>promo nuovi clienti</span></div>
-            <div class="stat"><strong>100%</strong><span>materiali ipoallergenici</span></div>
+            <div class="stat"><strong>Roma</strong><span data-i18n="hero.stat1">studio nails</span></div>
+            <div class="stat"><strong>45€</strong><span data-i18n="hero.stat2">promo nuovi clienti</span></div>
+            <div class="stat"><strong>100%</strong><span data-i18n="hero.stat3">materiali ipoallergenici</span></div>
           </div>
         </div>
         <div class="stack-3d fade-in">
@@ -354,8 +412,8 @@
           <div class="polaroid p2"><img src="vita-nails-media/770005291_18374130130225148_6631666502788500696_n.jpg" alt="Trattamento cuticole"></div>
           <img class="polaroid p3" src="vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg" alt="Vita in studio">
           <div class="badge-3d">
-            <strong>Promo nuovi clienti</strong>
-            <p>Manicure russa + semipermanente 45€</p>
+            <strong data-i18n="hero.badgeTitle">Promo nuovi clienti</strong>
+            <p data-i18n="hero.badgeText">Manicure russa + semipermanente 45€</p>
           </div>
         </div>
       </div>
@@ -367,27 +425,27 @@
           <img src="vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg" alt="Vita, onicotecnica a Roma">
         </div>
         <div class="about-content fade-in">
-          <span class="eyebrow">Chi sono</span>
-          <h2>Ciao, sono Vita</h2>
-          <p>
+          <span class="eyebrow" data-i18n="about.eyebrow">Chi sono</span>
+          <h2 data-i18n="about.title">Ciao, sono Vita</h2>
+          <p data-i18n="about.p1">
             Faccio manicure russa nel cuore di Roma. Non è solo smalto: è cuticola pulita, forma precisa,
             materiali sicuri e un risultato che si riconosce da vicino.
           </p>
-          <p>
+          <p data-i18n="about.p2">
             In studio lavoro su manicure, pedicure e podologia. La sicurezza non è uno standard:
             è la priorità numero uno. Prenotazioni in Direct su Instagram.
           </p>
-          <p>
+          <p data-i18n="about.p3">
             Accanto alle unghie porto anche il movimento: yoga e pilates, per chi vuole un percorso di cura più ampio.
             Ma qui il centro è uno: le tue mani e i tuoi piedi, trattati come un mestiere.
           </p>
           <div class="chips">
-            <span class="chip">Manicure russa</span>
-            <span class="chip">Semipermanente</span>
-            <span class="chip">Pedicure</span>
-            <span class="chip">Podologia</span>
-            <span class="chip">Corsi manicure</span>
-            <span class="chip">Yoga &amp; Pilates</span>
+            <span class="chip" data-i18n="about.chip1">Manicure russa</span>
+            <span class="chip" data-i18n="about.chip2">Semipermanente</span>
+            <span class="chip" data-i18n="about.chip3">Pedicure</span>
+            <span class="chip" data-i18n="about.chip4">Podologia</span>
+            <span class="chip" data-i18n="about.chip5">Corsi manicure</span>
+            <span class="chip" data-i18n="about.chip6">Yoga &amp; Pilates</span>
           </div>
         </div>
       </div>
@@ -396,30 +454,30 @@
     <section id="trattamenti" class="services">
       <div class="container">
         <div class="section-head fade-in">
-          <span class="eyebrow">Trattamenti</span>
-          <h2>Lo studio nails</h2>
-          <p>Tecnica russa, igiene e dettagli. Un bel colore non basta: si vede dal prima e dopo.</p>
+          <span class="eyebrow" data-i18n="services.eyebrow">Trattamenti</span>
+          <h2 data-i18n="services.title">Lo studio nails</h2>
+          <p data-i18n="services.sub">Tecnica russa, igiene e dettagli. Un bel colore non basta: si vede dal prima e dopo.</p>
         </div>
         <div class="cards">
           <div class="card-3d-wrap fade-in" data-tilt>
             <article class="card">
               <img src="vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg" alt="Manicure russa nude">
-              <h3>Manicure russa</h3>
-              <p>Tecnica moderna, cuticola a secco, forma pulita. Classico, semipermanente o copertura in gel. Anche per lui.</p>
+              <h3 data-i18n="services.card1.title">Manicure russa</h3>
+              <p data-i18n="services.card1.text">Tecnica moderna, cuticola a secco, forma pulita. Classico, semipermanente o copertura in gel. Anche per lui.</p>
             </article>
           </div>
           <div class="card-3d-wrap fade-in" data-tilt>
             <article class="card">
               <img src="vita-nails-media/743118282_18369095356225148_1340770568603173321_n.jpg" alt="Pedicure professionale">
-              <h3>Pedicure</h3>
-              <p>Dita e pianta del piede, anche curativo con semipermanente. Circa un'ora e mezza quando serve un lavoro completo.</p>
+              <h3 data-i18n="services.card2.title">Pedicure</h3>
+              <p data-i18n="services.card2.text">Dita e pianta del piede, anche curativo con semipermanente. Circa un'ora e mezza quando serve un lavoro completo.</p>
             </article>
           </div>
           <div class="card-3d-wrap fade-in" data-tilt>
             <article class="card">
               <img src="vita-nails-media/763570638_18373108366225148_2051787625624129724_n.jpg" alt="Strumenti professionali">
-              <h3>Podologia &amp; cura</h3>
-              <p>Ricostruzione ungueale, callo nucleato, fibra ritentiva, consulenza. Materiali ipoallergenici e postazione igienizzata.</p>
+              <h3 data-i18n="services.card3.title">Podologia &amp; cura</h3>
+              <p data-i18n="services.card3.text">Ricostruzione ungueale, callo nucleato, fibra ritentiva, consulenza. Materiali ipoallergenici e postazione igienizzata.</p>
             </article>
           </div>
         </div>
@@ -429,9 +487,9 @@
     <section id="lavori">
       <div class="container">
         <div class="section-head fade-in">
-          <span class="eyebrow">Portfolio</span>
-          <h2>Dal mio Instagram</h2>
-          <p>Lavori reali di @vita_nails_roma — scorri o trascina il carosello 3D.</p>
+          <span class="eyebrow" data-i18n="portfolio.eyebrow">Portfolio</span>
+          <h2 data-i18n="portfolio.title">Dal mio Instagram</h2>
+          <p data-i18n="portfolio.sub">Lavori reali di @vita_nails_roma — scorri o trascina il carosello 3D.</p>
         </div>
         <div class="carousel-wrap fade-in" id="carouselWrap">
           <div class="carousel-scene">
@@ -449,56 +507,56 @@
     <section id="listino" class="prices">
       <div class="container">
         <div class="section-head fade-in">
-          <span class="eyebrow">Nails &amp; Care</span>
-          <h2>Listino prezzi</h2>
-          <p>Bellezza · Cura · Professionalità — come sul listino dello studio.</p>
+          <span class="eyebrow" data-i18n="prices.eyebrow">Nails &amp; Care</span>
+          <h2 data-i18n="prices.title">Listino prezzi</h2>
+          <p data-i18n="prices.sub">Bellezza · Cura · Professionalità — come sul listino dello studio.</p>
         </div>
         <div class="price-cols">
           <div class="price-card fade-in">
-            <h3>Manicure</h3>
-            <div class="row"><span>Manicure</span><span>30€</span></div>
-            <div class="row"><span>Manicure + smalto classico</span><span>35€</span></div>
-            <div class="row"><span>Manicure + semipermanente</span><span>55€</span></div>
-            <div class="row"><span>Manicure + gel (ritocco)</span><span>65€</span></div>
-            <div class="row"><span>French art</span><span>+10€</span></div>
-            <div class="row"><span>Nail art</span><span>5–15€</span></div>
-            <div class="row"><span>Rimozione lavoro precedente</span><span>5–15€</span></div>
-            <div class="row"><span>Manicure uomo</span><span>30€</span></div>
+            <h3 data-i18n="prices.colManicure">Manicure</h3>
+            <div class="row"><span data-i18n="prices.m1">Manicure</span><span>30€</span></div>
+            <div class="row"><span data-i18n="prices.m2">Manicure + smalto classico</span><span>35€</span></div>
+            <div class="row"><span data-i18n="prices.m3">Manicure + semipermanente</span><span>55€</span></div>
+            <div class="row"><span data-i18n="prices.m4">Manicure + gel (ritocco)</span><span>65€</span></div>
+            <div class="row"><span data-i18n="prices.m5">French art</span><span>+10€</span></div>
+            <div class="row"><span data-i18n="prices.m6">Nail art</span><span>5–15€</span></div>
+            <div class="row"><span data-i18n="prices.m7">Rimozione lavoro precedente</span><span>5–15€</span></div>
+            <div class="row"><span data-i18n="prices.m8">Manicure uomo</span><span>30€</span></div>
           </div>
           <div class="price-card fade-in">
-            <h3>Pedicure</h3>
-            <div class="row"><span>Pedicure (dita + pianta)</span><span>55€</span></div>
-            <div class="row"><span>Pedicure + smalto classico</span><span>60€</span></div>
-            <div class="row"><span>Pedicure + semipermanente</span><span>65€</span></div>
-            <div class="row"><span>Rimozione lavoro precedente</span><span>5–15€</span></div>
-            <div class="row"><span>Pedicure uomo</span><span>60€</span></div>
+            <h3 data-i18n="prices.colPedicure">Pedicure</h3>
+            <div class="row"><span data-i18n="prices.p1">Pedicure (dita + pianta)</span><span>55€</span></div>
+            <div class="row"><span data-i18n="prices.p2">Pedicure + smalto classico</span><span>60€</span></div>
+            <div class="row"><span data-i18n="prices.p3">Pedicure + semipermanente</span><span>65€</span></div>
+            <div class="row"><span data-i18n="prices.p4">Rimozione lavoro precedente</span><span>5–15€</span></div>
+            <div class="row"><span data-i18n="prices.p5">Pedicure uomo</span><span>60€</span></div>
           </div>
           <div class="price-card fade-in">
-            <h3>Podologia</h3>
-            <div class="row"><span>Ricostruzione ungueale (1 unghia)</span><span>10€</span></div>
-            <div class="row"><span>Trattamento ungueale</span><span>5–25€</span></div>
-            <div class="row"><span>Rimozione callo nucleato</span><span>5–10€</span></div>
-            <div class="row"><span>Fibra ritentiva</span><span>40€</span></div>
-            <div class="row"><span>Consulenza (senza trattamento)</span><span>15€</span></div>
+            <h3 data-i18n="prices.colPodology">Podologia</h3>
+            <div class="row"><span data-i18n="prices.pod1">Ricostruzione ungueale (1 unghia)</span><span>10€</span></div>
+            <div class="row"><span data-i18n="prices.pod2">Trattamento ungueale</span><span>5–25€</span></div>
+            <div class="row"><span data-i18n="prices.pod3">Rimozione callo nucleato</span><span>5–10€</span></div>
+            <div class="row"><span data-i18n="prices.pod4">Fibra ritentiva</span><span>40€</span></div>
+            <div class="row"><span data-i18n="prices.pod5">Consulenza (senza trattamento)</span><span>15€</span></div>
           </div>
         </div>
-        <div class="promo fade-in">Nuovi clienti: manicure russa con semipermanente a 45€. Scrivi in Direct per la data.</div>
+        <div class="promo fade-in" data-i18n="prices.promo">Nuovi clienti: manicure russa con semipermanente a 45€. Scrivi in Direct per la data.</div>
       </div>
     </section>
 
     <section id="corsi">
       <div class="container corsi-box">
         <div class="fade-in">
-          <span class="eyebrow">Formazione</span>
-          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,2.7rem);font-weight:400;margin:0 0 1rem;">Corsi di manicure russa</h2>
-          <p style="color:var(--ink-soft);margin-bottom:1rem;">
+          <span class="eyebrow" data-i18n="courses.eyebrow">Formazione</span>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,2.7rem);font-weight:400;margin:0 0 1rem;" data-i18n="courses.title">Corsi di manicure russa</h2>
+          <p style="color:var(--ink-soft);margin-bottom:1rem;" data-i18n="courses.p1">
             Insegno la tecnica in studio. I lavori delle allieve — come @mimimaninails — restano nel feed:
             taglio, igiene, forma e semipermanente, passo dopo passo.
           </p>
-          <p style="color:var(--ink-soft);margin-bottom:1.4rem;">
+          <p style="color:var(--ink-soft);margin-bottom:1.4rem;" data-i18n="courses.p2">
             Se vuoi imparare la manicure russa a Roma, scrivimi. Posti limitati, lezioni pratiche.
           </p>
-          <a class="btn btn-gold" href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">Chiedi info sui corsi</a>
+          <a class="btn btn-gold" href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener" data-i18n="courses.btn">Chiedi info sui corsi</a>
         </div>
         <div class="corsi-photo fade-in">
           <img src="vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg" alt="Lavoro di allieva corso manicure">
@@ -509,32 +567,31 @@
     <section id="contatti">
       <div class="container contact-grid">
         <div class="contact-info fade-in">
-          <span class="eyebrow">Contatti</span>
-          <h2>Prenota da Vita</h2>
-          <p style="color:var(--ink-soft);">Le prenotazioni passano da Instagram Direct. Ti rispondo lì per data e trattamento.</p>
-          <div class="contact-item"><div><strong>Instagram</strong><a href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">@vita_nails_roma</a></div></div>
-          <div class="contact-item"><div><strong>Città</strong>Roma — manicure russa, pedicure, podologia</div></div>
+          <span class="eyebrow" data-i18n="contact.eyebrow">Contatti</span>
+          <h2 data-i18n="contact.title">Prenota da Vita</h2>
+          <p style="color:var(--ink-soft);" data-i18n="contact.sub">Le prenotazioni passano da Instagram Direct. Ti rispondo lì per data e trattamento.</p>
+          <div class="contact-item"><div><strong data-i18n="contact.instagram">Instagram</strong><a href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">@vita_nails_roma</a></div></div>
+          <div class="contact-item"><div><strong data-i18n="contact.city">Città</strong> <span data-i18n="contact.cityVal">Roma — manicure russa, pedicure, podologia</span></div></div>
           <div class="contact-item"><div><strong>Threads</strong><a href="https://www.threads.com/@vita_nails_roma" target="_blank" rel="noopener">@vita_nails_roma</a></div></div>
-          <div class="contact-item"><div><strong>Altro</strong>Yoga e pilates su richiesta, sempre tramite Direct</div></div>
+          <div class="contact-item"><div><strong data-i18n="contact.other">Altro</strong> <span data-i18n="contact.otherVal">Yoga e pilates su richiesta, sempre tramite Direct</span></div></div>
         </div>
         <form class="contact-form fade-in" id="contactForm">
-          <div class="form-group"><label for="nome">Nome</label><input id="nome" name="nome" required placeholder="Il tuo nome"></div>
+          <div class="form-group"><label for="nome" data-i18n="form.name">Nome</label><input id="nome" name="nome" required data-i18n-placeholder="form.namePh" placeholder="Il tuo nome"></div>
           <div class="form-group">
-            <label for="servizio">Trattamento</label>
-            <select id="servizio" name="servizio" required>
-              <option>Manicure russa + semipermanente (promo 45€)</option>
-              <option>Manicure</option>
-              <option>Pedicure</option>
-              <option>Podologia</option>
-              <option>Corso manicure</option>
-              <option>Yoga / Pilates</option>
-            </select>
+            <label for="servizio" data-i18n="form.service">Trattamento</label>
+            <select id="servizio" name="servizio" required></select>
           </div>
           <div class="form-group">
-            <label for="msg">Messaggio <span style="font-weight:400;text-transform:none;letter-spacing:0">(opzionale)</span></label>
-            <textarea id="msg" name="msg" placeholder="Giorno preferito, prima volta o ritocco..."></textarea>
+            <label for="msg"><span data-i18n="form.message">Messaggio</span> <span style="font-weight:400;text-transform:none;letter-spacing:0" data-i18n="form.optional">(opzionale)</span></label>
+            <textarea id="msg" name="msg" data-i18n-placeholder="form.msgPh" placeholder="Giorno preferito, prima volta o ritocco..."></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%">Prenota su Instagram Direct</button>
+          <button type="submit" class="btn btn-primary" style="width:100%" data-i18n="form.submit">Prenota su Instagram Direct</button>
+          <div id="msgPreview" class="msg-preview" hidden>
+            <p class="msg-preview-label" data-i18n="form.previewLabel">Il tuo messaggio per Instagram:</p>
+            <div id="msgPreviewText" class="msg-preview-text"></div>
+            <p class="msg-preview-hint" data-i18n="form.pasteHint">Messaggio copiato negli appunti. Incollalo manualmente in Direct — Instagram non permette l'incolla automatico dal sito.</p>
+            <button type="button" class="btn btn-outline" id="copyAgain" data-i18n="form.copyAgain">Copia di nuovo</button>
+          </div>
         </form>
       </div>
     </section>
@@ -544,18 +601,18 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="logo">Vita <span>Nails</span></div>
-            <p>Onicotecnica a Roma. Manicure russa, pedicure, podologia. Prenditi cura di te.</p>
+            <p data-i18n="footer.tagline">Onicotecnica a Roma. Manicure russa, pedicure, podologia. Prenditi cura di te.</p>
           </div>
           <div class="footer-col">
-            <h4>Studio</h4>
+            <h4 data-i18n="footer.studio">Studio</h4>
             <ul>
-              <li><a href="#trattamenti">Trattamenti</a></li>
-              <li><a href="#listino">Listino</a></li>
-              <li><a href="#corsi">Corsi</a></li>
+              <li><a href="#trattamenti" data-i18n="nav.services">Trattamenti</a></li>
+              <li><a href="#listino" data-i18n="nav.prices">Listino</a></li>
+              <li><a href="#corsi" data-i18n="nav.courses">Corsi</a></li>
             </ul>
           </div>
           <div class="footer-col">
-            <h4>Social</h4>
+            <h4 data-i18n="footer.social">Social</h4>
             <ul>
               <li><a href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">Instagram</a></li>
               <li><a href="https://www.threads.com/@vita_nails_roma" target="_blank" rel="noopener">Threads</a></li>
@@ -563,15 +620,198 @@
           </div>
         </div>
         <div class="footer-bottom">
-          <span>© 2026 Vita Nails Roma — Nails &amp; Care</span>
-          <span>Foto da @vita_nails_roma</span>
+          <span data-i18n="footer.copy">© 2026 Vita Nails Roma — Nails &amp; Care</span>
+          <span data-i18n="footer.photos">Foto da @vita_nails_roma</span>
         </div>
+        <p class="footer-credit">
+          <span data-i18n="footer.credit">Realizzato da</span>
+          <a href="https://www.instagram.com/notasknnyb_tch/" target="_blank" rel="noopener">Gianmarco</a>
+          · <a href="mailto:osare199@gmail.com">osare199@gmail.com</a>
+        </p>
       </div>
     </footer>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
+    const T = {
+      it: {
+        nav: { about: 'Chi sono', services: 'Trattamenti', portfolio: 'Lavori', prices: 'Listino', courses: 'Corsi', book: 'Prenota' },
+        hero: {
+          eyebrow: 'Onicotecnica · Roma · @vita_nails_roma',
+          title: 'Manicure russa, dettagli che <em>restano</em>',
+          text: 'Sono Vita. Studio nails a Roma: tecnica russa, materiali ipoallergenici e cura delle unghie fino alla pedicure e alla podologia. Bellezza, cura, professionalità — in ogni appuntamento.',
+          btnDirect: 'Prenota in Direct', btnPrices: 'Guarda il listino',
+          stat1: 'studio nails', stat2: 'promo nuovi clienti', stat3: 'materiali ipoallergenici',
+          badgeTitle: 'Promo nuovi clienti', badgeText: 'Manicure russa + semipermanente 45€'
+        },
+        about: {
+          eyebrow: 'Chi sono', title: 'Ciao, sono Vita',
+          p1: 'Faccio manicure russa nel cuore di Roma. Non è solo smalto: è cuticola pulita, forma precisa, materiali sicuri e un risultato che si riconosce da vicino.',
+          p2: 'In studio lavoro su manicure, pedicure e podologia. La sicurezza non è uno standard: è la priorità numero uno. Prenotazioni in Direct su Instagram.',
+          p3: 'Accanto alle unghie porto anche il movimento: yoga e pilates, per chi vuole un percorso di cura più ampio. Ma qui il centro è uno: le tue mani e i tuoi piedi, trattati come un mestiere.',
+          chip1: 'Manicure russa', chip2: 'Semipermanente', chip3: 'Pedicure', chip4: 'Podologia', chip5: 'Corsi manicure', chip6: 'Yoga & Pilates'
+        },
+        services: {
+          eyebrow: 'Trattamenti', title: 'Lo studio nails', sub: 'Tecnica russa, igiene e dettagli. Un bel colore non basta: si vede dal prima e dopo.',
+          card1: { title: 'Manicure russa', text: 'Tecnica moderna, cuticola a secco, forma pulita. Classico, semipermanente o copertura in gel. Anche per lui.' },
+          card2: { title: 'Pedicure', text: 'Dita e pianta del piede, anche curativo con semipermanente. Circa un\'ora e mezza quando serve un lavoro completo.' },
+          card3: { title: 'Podologia & cura', text: 'Ricostruzione ungueale, callo nucleato, fibra ritentiva, consulenza. Materiali ipoallergenici e postazione igienizzata.' }
+        },
+        portfolio: { eyebrow: 'Portfolio', title: 'Dal mio Instagram', sub: 'Lavori reali di @vita_nails_roma — scorri o trascina il carosello 3D.' },
+        prices: {
+          eyebrow: 'Nails & Care', title: 'Listino prezzi', sub: 'Bellezza · Cura · Professionalità — come sul listino dello studio.',
+          colManicure: 'Manicure', colPedicure: 'Pedicure', colPodology: 'Podologia',
+          m1: 'Manicure', m2: 'Manicure + smalto classico', m3: 'Manicure + semipermanente', m4: 'Manicure + gel (ritocco)',
+          m5: 'French art', m6: 'Nail art', m7: 'Rimozione lavoro precedente', m8: 'Manicure uomo',
+          p1: 'Pedicure (dita + pianta)', p2: 'Pedicure + smalto classico', p3: 'Pedicure + semipermanente',
+          p4: 'Rimozione lavoro precedente', p5: 'Pedicure uomo',
+          pod1: 'Ricostruzione ungueale (1 unghia)', pod2: 'Trattamento ungueale', pod3: 'Rimozione callo nucleato',
+          pod4: 'Fibra ritentiva', pod5: 'Consulenza (senza trattamento)',
+          promo: 'Nuovi clienti: manicure russa con semipermanente a 45€. Scrivi in Direct per la data.'
+        },
+        courses: {
+          eyebrow: 'Formazione', title: 'Corsi di manicure russa',
+          p1: 'Insegno la tecnica in studio. I lavori delle allieve — come @mimimaninails — restano nel feed: taglio, igiene, forma e semipermanente, passo dopo passo.',
+          p2: 'Se vuoi imparare la manicure russa a Roma, scrivimi. Posti limitati, lezioni pratiche.',
+          btn: 'Chiedi info sui corsi'
+        },
+        contact: {
+          eyebrow: 'Contatti', title: 'Prenota da Vita',
+          sub: 'Le prenotazioni passano da Instagram Direct. Ti rispondo lì per data e trattamento.',
+          instagram: 'Instagram', city: 'Città', cityVal: 'Roma — manicure russa, pedicure, podologia',
+          other: 'Altro', otherVal: 'Yoga e pilates su richiesta, sempre tramite Direct'
+        },
+        form: {
+          name: 'Nome', namePh: 'Il tuo nome', service: 'Trattamento', message: 'Messaggio', optional: '(opzionale)',
+          msgPh: 'Giorno preferito, prima volta o ritocco...', submit: 'Prenota su Instagram Direct',
+          previewLabel: 'Il tuo messaggio per Instagram:',
+          pasteHint: 'Messaggio copiato negli appunti. Incollalo manualmente in Direct — Instagram non permette l\'incolla automatico dal sito.',
+          copyAgain: 'Copia di nuovo', toastCopied: 'Messaggio copiato — incolla in Direct',
+          services: ['Manicure russa + semipermanente (promo 45€)', 'Manicure', 'Pedicure', 'Podologia', 'Corso manicure', 'Yoga / Pilates'],
+          msgTemplate: (nome, trattamento, extra) => {
+            let t = `Ciao Vita! Sono ${nome}. Vorrei prenotare: ${trattamento}.`;
+            if (extra) t += ` ${extra}`;
+            return t + ' Grazie!';
+          }
+        },
+        footer: {
+          tagline: 'Onicotecnica a Roma. Manicure russa, pedicure, podologia. Prenditi cura di te.',
+          studio: 'Studio', social: 'Social', copy: '© 2026 Vita Nails Roma — Nails & Care',
+          photos: 'Foto da @vita_nails_roma', credit: 'Realizzato da'
+        },
+        carousel: ['Manicure ombré baby boomer', 'Nude con glitter sottili', 'Semipermanente bordeaux', 'French milk glossy', 'Cura cuticole e olio', 'Pedicure professionale', 'Strumenti e igiene in cabina'],
+        aria: { menu: 'Apri menu', prev: 'Precedente', next: 'Successivo' }
+      },
+      ru: {
+        nav: { about: 'Обо мне', services: 'Услуги', portfolio: 'Работы', prices: 'Прайс', courses: 'Курсы', book: 'Запись' },
+        hero: {
+          eyebrow: 'Оникотехника · Рим · @vita_nails_roma',
+          title: 'Русский маникюр, детали, которые <em>остаются</em>',
+          text: 'Я — Вита. Nail studio в Риме: русская техника, гипоаллергенные материалы и уход за ногтями, педикюр и подология. Красота, забота, профессионализм — на каждом приёме.',
+          btnDirect: 'Записаться в Direct', btnPrices: 'Смотреть прайс',
+          stat1: 'nail studio', stat2: 'акция для новых клиентов', stat3: 'гипоаллергенные материалы',
+          badgeTitle: 'Акция для новых', badgeText: 'Русский маникюр + гель-лак 45€'
+        },
+        about: {
+          eyebrow: 'Обо мне', title: 'Привет, я Вита',
+          p1: 'Делаю русский маникюр в центре Рима. Это не просто лак: чистая кутикула, точная форма, безопасные материалы и результат, который виден вблизи.',
+          p2: 'В студии — маникюр, педикюр и подология. Безопасность — не стандарт, а приоритет номер один. Запись через Direct в Instagram.',
+          p3: 'Помимо ногтей — йога и пилатес для тех, кто хочет более широкий путь заботы о себе. Но здесь главное — ваши руки и ноги, как настоящее ремесло.',
+          chip1: 'Русский маникюр', chip2: 'Гель-лак', chip3: 'Педикюр', chip4: 'Подология', chip5: 'Курсы маникюра', chip6: 'Йога и пилатес'
+        },
+        services: {
+          eyebrow: 'Услуги', title: 'Nail studio', sub: 'Русская техника, гигиена и детали. Красивый цвет — не всё: видно по до и после.',
+          card1: { title: 'Русский маникюр', text: 'Современная техника, сухая кутикула, чистая форма. Классика, гель-лак или покрытие гелем. И для него тоже.' },
+          card2: { title: 'Педикюр', text: 'Пальцы и стопа, в том числе лечебный с гель-лаком. Около полтора часа, когда нужна полная работа.' },
+          card3: { title: 'Подология и уход', text: 'Реконструкция ногтя, нуклеарная мозоль, удерживающее волокно, консультация. Гипоаллергенные материалы и стерильное рабочее место.' }
+        },
+        portfolio: { eyebrow: 'Портфолио', title: 'Из моего Instagram', sub: 'Реальные работы @vita_nails_roma — листайте или перетаскивайте 3D-карусель.' },
+        prices: {
+          eyebrow: 'Nails & Care', title: 'Прайс-лист', sub: 'Красота · Забота · Профессионализм — как в студии.',
+          colManicure: 'Маникюр', colPedicure: 'Педикюр', colPodology: 'Подология',
+          m1: 'Маникюр', m2: 'Маникюр + обычный лак', m3: 'Маникюр + гель-лак', m4: 'Маникюр + гель (коррекция)',
+          m5: 'French art', m6: 'Nail art', m7: 'Снятие предыдущей работы', m8: 'Маникюр для него',
+          p1: 'Педикюр (пальцы + стопа)', p2: 'Педикюр + обычный лак', p3: 'Педикюр + гель-лак',
+          p4: 'Снятие предыдущей работы', p5: 'Педикюр для него',
+          pod1: 'Реконструкция ногтя (1 ноготь)', pod2: 'Лечение ногтя', pod3: 'Удаление нуклеарной мозоли',
+          pod4: 'Удерживающее волокно', pod5: 'Консультация (без процедуры)',
+          promo: 'Новым клиентам: русский маникюр с гель-лаком за 45€. Напишите в Direct для записи.'
+        },
+        courses: {
+          eyebrow: 'Обучение', title: 'Курсы русского маникюра',
+          p1: 'Обучаю технике в студии. Работы учениц — как @mimimaninails — остаются в ленте: форма, гигиена и гель-лак шаг за шагом.',
+          p2: 'Хотите научиться русскому маникюру в Риме — напишите. Мест мало, практические занятия.',
+          btn: 'Узнать о курсах'
+        },
+        contact: {
+          eyebrow: 'Контакты', title: 'Запись к Вите',
+          sub: 'Запись через Instagram Direct. Отвечу там по дате и процедуре.',
+          instagram: 'Instagram', city: 'Город', cityVal: 'Рим — русский маникюр, педикюр, подология',
+          other: 'Другое', otherVal: 'Йога и пилатес по запросу, всегда через Direct'
+        },
+        form: {
+          name: 'Имя', namePh: 'Ваше имя', service: 'Процедура', message: 'Сообщение', optional: '(необязательно)',
+          msgPh: 'Удобный день, первый раз или коррекция...', submit: 'Записаться в Instagram Direct',
+          previewLabel: 'Ваше сообщение для Instagram:',
+          pasteHint: 'Сообщение скопировано. Вставьте вручную в Direct — Instagram не позволяет автоматическую вставку с сайта.',
+          copyAgain: 'Скопировать снова', toastCopied: 'Сообщение скопировано — вставьте в Direct',
+          services: ['Русский маникюр + гель-лак (акция 45€)', 'Маникюр', 'Педикюр', 'Подология', 'Курс маникюра', 'Йога / Пилатес'],
+          msgTemplate: (nome, trattamento, extra) => {
+            let t = `Привет, Вита! Я ${nome}. Хочу записаться: ${trattamento}.`;
+            if (extra) t += ` ${extra}`;
+            return t + ' Спасибо!';
+          }
+        },
+        footer: {
+          tagline: 'Оникотехника в Риме. Русский маникюр, педикюр, подология. Заботьтесь о себе.',
+          studio: 'Студия', social: 'Соцсети', copy: '© 2026 Vita Nails Roma — Nails & Care',
+          photos: 'Фото @vita_nails_roma', credit: 'Сделано'
+        },
+        carousel: ['Маникюр ombré baby boomer', 'Nude с блёстками', 'Гель-лак бордо', 'French milk glossy', 'Уход за кутикулой', 'Профессиональный педикюр', 'Инструменты и гигиена'],
+        aria: { menu: 'Открыть меню', prev: 'Назад', next: 'Вперёд' }
+      }
+    };
+
+    let lang = localStorage.getItem('vn-lang') || 'it';
+    if (!T[lang]) lang = 'it';
+
+    function t(key) {
+      return key.split('.').reduce((o, k) => o?.[k], T[lang]) ?? key;
+    }
+
+    function applyLang() {
+      document.documentElement.lang = lang === 'ru' ? 'ru' : 'it';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.dataset.i18n);
+      });
+      document.querySelectorAll('[data-i18n-html]').forEach(el => {
+        el.innerHTML = t(el.dataset.i18nHtml);
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.placeholder = t(el.dataset.i18nPlaceholder);
+      });
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      menuToggle.setAttribute('aria-label', t('aria.menu'));
+      document.getElementById('carouselPrev').setAttribute('aria-label', t('aria.prev'));
+      document.getElementById('carouselNext').setAttribute('aria-label', t('aria.next'));
+      const sel = document.getElementById('servizio');
+      const cur = sel.value;
+      sel.innerHTML = T[lang].form.services.map(s => `<option>${s}</option>`).join('');
+      if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+      updateCarouselCaptions();
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lang = btn.dataset.lang;
+        localStorage.setItem('vn-lang', lang);
+        applyLang();
+      });
+    });
+
     const header = document.getElementById('header');
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.getElementById('navLinks');
@@ -619,26 +859,29 @@
       const nome = document.getElementById('nome').value.trim();
       const trattamento = document.getElementById('servizio').value;
       const extra = document.getElementById('msg').value.trim();
-      let text = `Ciao Vita! Sono ${nome}. Vorrei prenotare: ${trattamento}.`;
-      if (extra) text += ` ${extra}`;
-      text += ' Grazie!';
-      try {
-        await navigator.clipboard.writeText(text);
-        showToast('Messaggio copiato — incolla in Direct');
-      } catch {
-        showToast('Messaggio copiato — incolla in Direct');
-      }
+      const text = T[lang].form.msgTemplate(nome, trattamento, extra);
+      const preview = document.getElementById('msgPreview');
+      const previewText = document.getElementById('msgPreviewText');
+      previewText.textContent = text;
+      preview.hidden = false;
+      try { await navigator.clipboard.writeText(text); } catch { /* ponytail: fallback = visible box */ }
+      showToast(t('form.toastCopied'));
       window.open('https://ig.me/m/vita_nails_roma', '_blank', 'noopener');
     });
 
+    document.getElementById('copyAgain').addEventListener('click', async () => {
+      const text = document.getElementById('msgPreviewText').textContent;
+      try { await navigator.clipboard.writeText(text); showToast(t('form.toastCopied')); } catch { showToast(t('form.toastCopied')); }
+    });
+
     const portfolio = [
-      { src: 'vita-nails-media/748343452_18370067008225148_7537438290145286546_n.jpg', alt: 'Ombré baby boomer', cap: 'Manicure ombré baby boomer' },
-      { src: 'vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg', alt: 'Nude glitter', cap: 'Nude con glitter sottili' },
-      { src: 'vita-nails-media/623090306_18344774293225148_8290666929850416444_n.jpg', alt: 'Bordeaux lucido', cap: 'Semipermanente bordeaux' },
-      { src: 'vita-nails-media/500423906_18313195303225148_2750952574447067859_n.jpg', alt: 'French milk', cap: 'French milk glossy' },
-      { src: 'vita-nails-media/770005291_18374130130225148_6631666502788500696_n.jpg', alt: 'Trattamento cuticole', cap: 'Cura cuticole e olio' },
-      { src: 'vita-nails-media/743118282_18369095356225148_1340770568603173321_n.jpg', alt: 'Pedicure', cap: 'Pedicure professionale' },
-      { src: 'vita-nails-media/763570638_18373108366225148_2051787625624129724_n.jpg', alt: 'Strumenti', cap: 'Strumenti e igiene in cabina' }
+      { src: 'vita-nails-media/748343452_18370067008225148_7537438290145286546_n.jpg', alt: 'Ombré baby boomer', capKey: 0 },
+      { src: 'vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg', alt: 'Nude glitter', capKey: 1 },
+      { src: 'vita-nails-media/623090306_18344774293225148_8290666929850416444_n.jpg', alt: 'Bordeaux lucido', capKey: 2 },
+      { src: 'vita-nails-media/500423906_18313195303225148_2750952574447067859_n.jpg', alt: 'French milk', capKey: 3 },
+      { src: 'vita-nails-media/770005291_18374130130225148_6631666502788500696_n.jpg', alt: 'Trattamento cuticole', capKey: 4 },
+      { src: 'vita-nails-media/743118282_18369095356225148_1340770568603173321_n.jpg', alt: 'Pedicure', capKey: 5 },
+      { src: 'vita-nails-media/763570638_18373108366225148_2051787625624129724_n.jpg', alt: 'Strumenti', capKey: 6 }
     ];
 
     const stage = document.getElementById('carouselStage');
@@ -658,7 +901,7 @@
     portfolio.forEach((item, i) => {
       const slide = document.createElement('div');
       slide.className = 'carousel-slide' + (i === 0 ? ' active' : '');
-      slide.innerHTML = `<img src="${item.src}" alt="${item.alt}"><div class="carousel-caption">${item.cap}</div>`;
+      slide.innerHTML = `<img src="${item.src}" alt="${item.alt}"><div class="carousel-caption">${T[lang].carousel[item.capKey]}</div>`;
       stage.appendChild(slide);
 
       const dot = document.createElement('button');
@@ -670,6 +913,13 @@
 
     const slides = [...stage.children];
     const dots = [...dotsWrap.children];
+
+    function updateCarouselCaptions() {
+      slides.forEach((slide, i) => {
+        const cap = slide.querySelector('.carousel-caption');
+        if (cap) cap.textContent = T[lang].carousel[portfolio[i].capKey];
+      });
+    }
 
     function layoutRing() {
       radius = Math.min(420, innerWidth * 0.34);
@@ -831,6 +1081,7 @@
       else renderer.render(scene, camera);
     }
     initBg();
+    applyLang();
   </script>
 </body>
 </html>
