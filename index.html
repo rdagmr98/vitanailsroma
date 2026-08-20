@@ -176,6 +176,7 @@
       height: min(520px, 72vh);
       perspective: 1100px;
       perspective-origin: 50% 42%;
+      transform-style: preserve-3d;
       margin: 0 auto 1.5rem;
       touch-action: none;
       cursor: grab;
@@ -280,7 +281,6 @@
       background: var(--cream); font-family: inherit; font-size: 0.95rem;
     }
     .form-group textarea { min-height: 110px; resize: vertical; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 
     footer { background: #1f1b19; color: rgba(255,250,245,0.7); padding: 2.6rem 0 1.6rem; }
     .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1.6rem; margin-bottom: 1.6rem; }
@@ -624,9 +624,9 @@
       text += ' Grazie!';
       try {
         await navigator.clipboard.writeText(text);
-        showToast('Messaggio copiato — incolla in Direct Instagram');
+        showToast('Messaggio copiato — incolla in Direct');
       } catch {
-        showToast('Copia il messaggio e incollalo in Direct Instagram');
+        showToast('Messaggio copiato — incolla in Direct');
       }
       window.open('https://ig.me/m/vita_nails_roma', '_blank', 'noopener');
     });
