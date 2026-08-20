@@ -1,11 +1,4 @@
 {
-  "occupied": [
-    "2026-08-20T15:00"
-  ],
-  "codes": {
-    "VN-BD7253": {
-      "status": "pending",
-      "slotId": "2026-08-20T15:00"
-    }
-  }
+  "occupied": [],
+  "codes": {}
 }

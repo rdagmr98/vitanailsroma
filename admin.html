@@ -82,8 +82,7 @@
 
     async function authOk(id, pw) {
       const admin = await VitaBook.loadJson("admin.json");
-      const h = await VitaBook.sha256hex(pw);
-      return id === admin.id && h === admin.passwordSha256;
+      return id === admin.id && pw === admin.password;
     }
 
     async function refresh() {
@@ -194,7 +193,7 @@
 
     savePw.addEventListener("click", async () => {
       const n = newPw.value;
-      if (n.length < 10) { show("", "Minimo 10 caratteri."); return; }
+      if (n.length < 6) { show("", "Minimo 6 caratteri."); return; }
       try {
         await VitaBook.api("change_password", { adminId: cred.id, password: cred.pw, newPassword: n });
         cred.pw = n;

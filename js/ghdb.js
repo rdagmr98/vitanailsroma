@@ -17,19 +17,32 @@
     return `${api}/repos/${c.owner}/${c.repo}/contents/${c.path}/${name}`;
   }
 
+  function b64ToUtf8(b64) {
+    const bin = atob(String(b64).replace(/\n/g, ""));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+
+  function utf8ToB64(str) {
+    const bytes = new TextEncoder().encode(str);
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+
   async function getFile(name) {
     const r = await fetch(fileUrl(name), { headers: headers() });
     if (r.status === 404) return { data: null, sha: "" };
     if (!r.ok) throw new Error("get:" + name);
     const j = await r.json();
-    const text = atob(j.content.replace(/\n/g, ""));
-    return { data: JSON.parse(decodeURIComponent(escape(text))), sha: j.sha };
+    return { data: JSON.parse(b64ToUtf8(j.content)), sha: j.sha };
   }
 
   async function putFile(name, data, sha, message) {
     const body = {
       message: message || ("vita: " + name),
-      content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2) + "\n"))),
+      content: utf8ToB64(JSON.stringify(data, null, 2) + "\n"),
     };
     if (sha) body.sha = sha;
     const r = await fetch(fileUrl(name), {
@@ -50,8 +63,8 @@
   async function writeWithRetry(name, mutator, message, tries = 6) {
     for (let i = 0; i < tries; i++) {
       const cur = await getFile(name);
-      const next = mutator(cur.data);
-      if (next === cur.data) return cur.data;
+      const base = cur.data == null ? null : JSON.parse(JSON.stringify(cur.data));
+      const next = mutator(base);
       try {
         await putFile(name, next, cur.sha, message);
         return next;

@@ -10,11 +10,6 @@ function apiReady() {
   return !!(window.VITA_GH && window.VITA_GH.token);
 }
 
-async function sha256hex(s) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
 async function loadJson(name) {
   if (!apiReady()) throw new Error("noapi");
   const f = await VitaGhDb.getFile(name);
@@ -84,7 +79,7 @@ async function syncPublic(bookings) {
 async function requireAdmin(p) {
   const admin = await loadJson("admin.json");
   if ((p.adminId || "") !== admin.id) throw new Error("auth");
-  if ((await sha256hex(p.password || "")) !== admin.passwordSha256) throw new Error("auth");
+  if ((p.password || "") !== admin.password) throw new Error("auth");
 }
 
 async function api(op, p) {
@@ -175,11 +170,10 @@ async function api(op, p) {
   if (op === "change_password") {
     await requireAdmin(p);
     const neu = p.newPassword || "";
-    if (neu.length < 10) throw new Error("weak");
-    const hash = await sha256hex(neu);
+    if (neu.length < 6) throw new Error("weak");
     await VitaGhDb.writeWithRetry("admin.json", (cur) => ({
       id: (cur && cur.id) || p.adminId,
-      passwordSha256: hash,
+      password: neu,
     }), "vita: password");
     return { ok: true };
   }
@@ -202,4 +196,4 @@ async function api(op, p) {
   throw new Error("op");
 }
 
-window.VitaBook = { loadJson, sha256hex, api, expandSlots, apiReady, bust };
+window.VitaBook = { loadJson, api, expandSlots, apiReady, bust };
