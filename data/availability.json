@@ -1,9 +1,15 @@
 {
-  "occupied": [],
+  "occupied": [
+    "2026-08-20T16:30"
+  ],
   "codes": {
     "VN-F60AB7": {
       "status": "declined",
       "slotId": "2026-08-20T15:00"
+    },
+    "VN-033B37": {
+      "status": "pending",
+      "slotId": "2026-08-20T16:30"
     }
   }
 }
