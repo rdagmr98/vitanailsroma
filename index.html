@@ -38,7 +38,19 @@
     img { max-width: 100%; display: block; }
     .container { width: min(1140px, calc(100% - 2.4rem)); margin-inline: auto; }
 
-    #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.4; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.45;
+      background:
+        radial-gradient(circle at 18% 28%, rgba(196, 139, 134, 0.35), transparent 52%),
+        radial-gradient(circle at 82% 72%, rgba(197, 160, 89, 0.28), transparent 48%),
+        radial-gradient(circle at 55% 48%, rgba(232, 196, 192, 0.22), transparent 58%);
+      animation: bgShift 20s ease-in-out infinite alternate;
+    }
+    @keyframes bgShift {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.06) translate(-1.5%, 1%); }
+    }
     .page { position: relative; z-index: 2; }
 
     header {
@@ -157,19 +169,31 @@
     .card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; margin-bottom: 0.55rem; }
     .card p { color: var(--ink-soft); font-size: 0.94rem; }
 
-    /* 3D Carousel Lavori */
+    /* 3D ring carousel — Lavori */
+    #lavori { overflow: visible; }
     .carousel-wrap {
       position: relative;
       height: min(520px, 72vh);
-      perspective: 1400px;
+      perspective: 1100px;
+      perspective-origin: 50% 42%;
       margin: 0 auto 1.5rem;
-      touch-action: pan-y;
+      touch-action: none;
+      cursor: grab;
+      user-select: none;
+      overflow: visible;
+    }
+    .carousel-wrap.is-dragging { cursor: grabbing; }
+    .carousel-scene {
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
     }
     .carousel-stage {
       width: 100%; height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotateX(-10deg);
+      will-change: transform;
     }
     .carousel-slide {
       position: absolute;
@@ -182,12 +206,17 @@
       overflow: hidden;
       border: 8px solid var(--ivory);
       box-shadow: var(--shadow);
-      backface-visibility: hidden;
-      cursor: grab;
-      transition: box-shadow 0.4s ease, filter 0.4s ease;
+      transform-style: preserve-3d;
+      backface-visibility: visible;
+      transition: box-shadow 0.35s ease, filter 0.35s ease, opacity 0.35s ease;
     }
-    .carousel-slide.active { box-shadow: 0 30px 70px rgba(44,38,36,0.18); filter: brightness(1); }
-    .carousel-slide:not(.active) { filter: brightness(0.88); }
+    .carousel-slide.active {
+      box-shadow: 0 32px 80px rgba(44,38,36,0.22);
+      filter: brightness(1);
+      opacity: 1;
+      z-index: 2;
+    }
+    .carousel-slide:not(.active) { filter: brightness(0.82) saturate(0.92); opacity: 0.78; }
     .carousel-slide img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
     .carousel-caption {
       position: absolute; left: 0; right: 0; bottom: 0;
@@ -283,8 +312,6 @@
   </style>
 </head>
 <body>
-  <canvas id="bg-canvas"></canvas>
-
   <div class="page">
     <header id="header">
       <div class="container nav">
@@ -405,7 +432,9 @@
           <p>Lavori reali di @vita_nails_roma — scorri o trascina il carosello 3D.</p>
         </div>
         <div class="carousel-wrap fade-in" id="carouselWrap">
-          <div class="carousel-stage" id="carouselStage"></div>
+          <div class="carousel-scene">
+            <div class="carousel-stage" id="carouselStage"></div>
+          </div>
         </div>
         <div class="carousel-controls fade-in">
           <button class="carousel-btn" id="carouselPrev" aria-label="Precedente">‹</button>
@@ -542,19 +571,13 @@
     </footer>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     const header = document.getElementById('header');
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.getElementById('navLinks');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let mx = 0, my = 0;
 
     window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 40));
-    document.addEventListener('mousemove', e => {
-      mx = (e.clientX / innerWidth - 0.5) * 2;
-      my = (e.clientY / innerHeight - 0.5) * 2;
-    });
     menuToggle.addEventListener('click', () => {
       menuToggle.classList.toggle('open');
       navLinks.classList.toggle('open');
@@ -594,10 +617,17 @@
 
     const stage = document.getElementById('carouselStage');
     const dotsWrap = document.getElementById('carouselDots');
-    let index = 0;
-    let dragStartX = 0;
+    const wrap = document.getElementById('carouselWrap');
+    const count = portfolio.length;
+    const stepDeg = 360 / count;
+    let radius = Math.min(420, innerWidth * 0.34);
+    let rotation = 0;
+    let targetRotation = 0;
+    let paused = false;
     let dragging = false;
-    let autoTimer;
+    let snapAnimating = false;
+    let dragStartX = 0;
+    let dragStartRotation = 0;
 
     portfolio.forEach((item, i) => {
       const slide = document.createElement('div');
@@ -614,103 +644,99 @@
 
     const slides = [...stage.children];
     const dots = [...dotsWrap.children];
-    const radius = Math.min(420, innerWidth * 0.34);
 
-    function layout() {
+    function layoutRing() {
+      radius = Math.min(420, innerWidth * 0.34);
       slides.forEach((slide, i) => {
-        const angle = ((i - index) / portfolio.length) * Math.PI * 2;
-        const x = Math.sin(angle) * radius;
-        const z = Math.cos(angle) * radius - radius;
-        const rotY = -angle * (180 / Math.PI);
-        slide.style.transform = `translate3d(${x}px, 0, ${z}px) rotateY(${rotY}deg)`;
-        slide.classList.toggle('active', i === index);
+        const angle = i * stepDeg;
+        slide.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`;
       });
-      dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
     }
 
-    function goTo(i) {
-      index = (i + portfolio.length) % portfolio.length;
-      layout();
-      resetAuto();
+    function activeIndex() {
+      const normalized = ((-rotation % 360) + 360) % 360;
+      return Math.round(normalized / stepDeg) % count;
     }
 
-    function next() { goTo(index + 1); }
-    function prev() { goTo(index - 1); }
+    function render() {
+      stage.style.transform = `rotateX(-10deg) rotateY(${rotation}deg)`;
+      const active = activeIndex();
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === active));
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === active));
+    }
+
+    function snapToIndex(i) {
+      const current = activeIndex();
+      let delta = i - current;
+      if (delta > count / 2) delta -= count;
+      if (delta < -count / 2) delta += count;
+      targetRotation = rotation - delta * stepDeg;
+      snapAnimating = true;
+    }
+
+    function goTo(i) { snapToIndex((i + count) % count); }
+    function next() { goTo(activeIndex() + 1); }
+    function prev() { goTo(activeIndex() - 1); }
 
     document.getElementById('carouselNext').addEventListener('click', next);
     document.getElementById('carouselPrev').addEventListener('click', prev);
 
-    const wrap = document.getElementById('carouselWrap');
-    wrap.addEventListener('pointerdown', e => { dragging = true; dragStartX = e.clientX; wrap.setPointerCapture(e.pointerId); });
-    wrap.addEventListener('pointerup', e => {
-      if (!dragging) return;
-      const dx = e.clientX - dragStartX;
-      if (Math.abs(dx) > 40) (dx < 0 ? next : prev)();
-      dragging = false;
+    wrap.addEventListener('mouseenter', () => { paused = true; });
+    wrap.addEventListener('mouseleave', () => { if (!dragging) paused = false; });
+
+    wrap.addEventListener('pointerdown', e => {
+      dragging = true;
+      snapAnimating = false;
+      paused = true;
+      dragStartX = e.clientX;
+      dragStartRotation = rotation;
+      wrap.classList.add('is-dragging');
+      wrap.setPointerCapture(e.pointerId);
     });
+
     wrap.addEventListener('pointermove', e => {
       if (!dragging) return;
-      stage.style.transform = `rotateY(${(e.clientX - dragStartX) * 0.08}deg)`;
+      rotation = dragStartRotation + (e.clientX - dragStartX) * 0.35;
+      render();
     });
-    wrap.addEventListener('pointerup', () => { stage.style.transform = ''; });
 
-    function resetAuto() {
-      clearInterval(autoTimer);
-      if (!reduced) autoTimer = setInterval(next, 4500);
+    wrap.addEventListener('pointerup', () => {
+      if (!dragging) return;
+      dragging = false;
+      wrap.classList.remove('is-dragging');
+      snapToIndex(activeIndex());
+      paused = false;
+    });
+
+    wrap.addEventListener('pointercancel', () => {
+      dragging = false;
+      wrap.classList.remove('is-dragging');
+      snapToIndex(activeIndex());
+      paused = false;
+    });
+
+    function tick() {
+      if (!dragging && !reduced) {
+        if (snapAnimating) {
+          const diff = targetRotation - rotation;
+          if (Math.abs(diff) < 0.12) {
+            rotation = targetRotation;
+            snapAnimating = false;
+          } else {
+            rotation += diff * 0.14;
+          }
+        } else if (!paused) {
+          rotation -= 0.045;
+        }
+      }
+      render();
+      requestAnimationFrame(tick);
     }
 
-    addEventListener('resize', layout);
-    layout();
-    resetAuto();
-
-    function initBg() {
-      const canvas = document.getElementById('bg-canvas');
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-      renderer.setClearColor(0x000000, 0);
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
-      camera.position.set(0, 0.4, 6);
-      scene.add(new THREE.AmbientLight(0xfff5ee, 0.9));
-      const d = new THREE.DirectionalLight(0xffffff, 0.85); d.position.set(3, 4, 5); scene.add(d);
-
-      const colors = [0xc48b86, 0xc5a059, 0xe8c4c0, 0x3a3330];
-      const objects = [];
-      for (let i = 0; i < 14; i++) {
-        const mesh = new THREE.Mesh(
-          i % 2 ? new THREE.SphereGeometry(0.1, 16, 16) : new THREE.IcosahedronGeometry(0.14, 0),
-          new THREE.MeshStandardMaterial({ color: colors[i % colors.length], roughness: 0.4, metalness: 0.25, transparent: true, opacity: 0.24 })
-        );
-        mesh.position.set((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 8 - 3);
-        mesh.userData.s = 0.3 + Math.random() * 0.5;
-        objects.push(mesh);
-        scene.add(mesh);
-      }
-
-      function resize() {
-        renderer.setSize(innerWidth, innerHeight);
-        camera.aspect = innerWidth / innerHeight;
-        camera.updateProjectionMatrix();
-      }
-      resize();
-      addEventListener('resize', resize);
-
-      let t = 0;
-      function loop() {
-        requestAnimationFrame(loop);
-        t += 0.016;
-        objects.forEach((m, i) => {
-          m.rotation.y += 0.004 * m.userData.s;
-          m.position.y += Math.sin(t * m.userData.s + i) * 0.002;
-        });
-        camera.position.x = mx * 0.35;
-        camera.position.y = my * 0.15;
-        camera.lookAt(0, 0, -2);
-        renderer.render(scene, camera);
-      }
-      if (!reduced) loop(); else renderer.render(scene, camera);
-    }
-    initBg();
+    addEventListener('resize', () => { layoutRing(); render(); });
+    layoutRing();
+    render();
+    tick();
   </script>
 </body>
 </html>
