@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Vita Nails Roma — onicotecnica, manicure russa, pedicure e podologia a Roma. Bellezza, cura, professionalità.">
+  <title>Vita Nails Roma — Onicotecnica &amp; Manicure Russa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #f7f1ea;
+      --ivory: #fffaf5;
+      --blush: #e8c4c0;
+      --rose: #c48b86;
+      --gold: #c5a059;
+      --gold-soft: #e0c48a;
+      --ink: #2c2624;
+      --ink-soft: #6a605a;
+      --charcoal: #3a3330;
+      --shadow: 0 24px 60px rgba(44, 38, 36, 0.1);
+      --radius: 22px;
+      --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 300;
+      color: var(--ink);
+      background: var(--cream);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .container { width: min(1140px, calc(100% - 2.4rem)); margin-inline: auto; }
+
+    #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.4; }
+    .page { position: relative; z-index: 2; }
+
+    header {
+      position: fixed; inset: 0 0 auto 0; z-index: 100; padding: 1.15rem 0;
+      transition: background var(--transition), padding var(--transition), box-shadow var(--transition);
+    }
+    header.scrolled {
+      background: rgba(247, 241, 234, 0.88);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(44, 38, 36, 0.06);
+      padding: 0.75rem 0;
+    }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 600; }
+    .logo span { color: var(--rose); font-style: italic; font-weight: 400; }
+    .nav-links { display: flex; align-items: center; gap: 1.7rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.86rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--ink-soft); transition: color var(--transition);
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 0.85rem 1.55rem; border-radius: 999px; border: none; cursor: pointer;
+      font-size: 0.9rem; font-weight: 500; letter-spacing: 0.03em;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .btn:hover { transform: translateY(-3px); }
+    .btn-primary { background: var(--charcoal); color: var(--ivory); box-shadow: 0 14px 32px rgba(44, 38, 36, 0.22); }
+    .btn-primary:hover { background: #4a403c; }
+    .btn-gold { background: var(--gold); color: var(--ink); }
+    .btn-outline { background: rgba(255,250,245,0.7); border: 1.5px solid rgba(44,38,36,0.15); }
+
+    .menu-toggle {
+      display: none; background: none; border: none; cursor: pointer;
+      width: 44px; height: 44px; place-items: center;
+    }
+    .menu-toggle span, .menu-toggle span::before, .menu-toggle span::after {
+      display: block; width: 22px; height: 2px; background: var(--ink); position: relative;
+    }
+    .menu-toggle span::before, .menu-toggle span::after { content: ''; position: absolute; left: 0; }
+    .menu-toggle span::before { top: -7px; }
+    .menu-toggle span::after { top: 7px; }
+
+    .hero { min-height: 100vh; display: grid; align-items: center; padding: 7.2rem 0 4rem; }
+    .hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 2.5rem; align-items: center; }
+    .eyebrow {
+      display: inline-block; font-size: 0.76rem; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--rose); margin-bottom: 1.1rem;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 6vw, 5.1rem); font-weight: 400; line-height: 1.05; margin-bottom: 1.2rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--rose); }
+    .hero-text { font-size: 1.08rem; color: var(--ink-soft); max-width: 34rem; margin-bottom: 1.8rem; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 2.2rem; }
+    .hero-stats { display: flex; gap: 2.2rem; flex-wrap: wrap; }
+    .stat strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 1.85rem; color: var(--gold); line-height: 1; }
+    .stat span { font-size: 0.82rem; color: var(--ink-soft); }
+
+    .stack-3d { position: relative; height: 520px; perspective: 1400px; transform-style: preserve-3d; }
+    .polaroid {
+      position: absolute; border-radius: 18px; overflow: hidden;
+      box-shadow: var(--shadow); background: var(--ivory); transform-style: preserve-3d; border: 8px solid var(--ivory);
+    }
+    .polaroid img { width: 100%; height: 100%; object-fit: cover; }
+    .p1 { width: 58%; height: 72%; right: 0; top: 0; z-index: 1; animation: floatA 7s ease-in-out infinite; }
+    .p2 { width: 48%; height: 58%; left: 0; bottom: 18%; z-index: 2; animation: floatB 8s ease-in-out infinite; }
+    .p3 {
+      width: 120px; height: 120px; border-radius: 50%; left: 38%; bottom: 0; z-index: 3;
+      border: 5px solid var(--ivory); animation: floatC 6s ease-in-out infinite;
+    }
+    .badge-3d {
+      position: absolute; right: 4%; bottom: 8%; z-index: 4;
+      background: rgba(255,250,245,0.92); backdrop-filter: blur(10px);
+      padding: 1rem 1.15rem; border-radius: 16px; box-shadow: var(--shadow);
+      max-width: 180px; animation: floatC 6.5s ease-in-out infinite 0.4s;
+    }
+    .badge-3d strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; }
+    .badge-3d p { font-size: 0.8rem; color: var(--ink-soft); }
+    @keyframes floatA { 0%,100% { transform: rotateY(-8deg) rotateX(4deg) translateY(0); } 50% { transform: rotateY(-4deg) rotateX(2deg) translateY(-12px); } }
+    @keyframes floatB { 0%,100% { transform: rotateY(10deg) rotateZ(-4deg) translateY(0); } 50% { transform: rotateY(6deg) rotateZ(-2deg) translateY(-10px); } }
+    @keyframes floatC { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+    section { padding: 5.5rem 0; position: relative; }
+    .section-head { text-align: center; max-width: 620px; margin: 0 auto 3rem; }
+    .section-head h2 {
+      font-family: 'Cormorant Garamond', serif; font-size: clamp(2.1rem, 4vw, 3rem); font-weight: 400; margin-bottom: 0.8rem;
+    }
+    .section-head p { color: var(--ink-soft); }
+
+    .about-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 3rem; align-items: center; }
+    .about-photo {
+      border-radius: 28px; overflow: hidden; aspect-ratio: 4/5;
+      box-shadow: var(--shadow); transform: rotateY(-6deg); transform-style: preserve-3d;
+    }
+    .about-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+    .about-content h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 3.4vw, 2.6rem); margin-bottom: 1rem; }
+    .about-content p { color: var(--ink-soft); margin-bottom: 0.95rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 1.4rem; }
+    .chip {
+      padding: 0.4rem 0.9rem; border-radius: 999px; background: rgba(255,250,245,0.85);
+      border: 1px solid rgba(197,160,89,0.35); font-size: 0.8rem; color: var(--charcoal);
+    }
+
+    .services { background: rgba(255,250,245,0.72); backdrop-filter: blur(10px); }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; perspective: 1200px; }
+    .card-3d-wrap { transform-style: preserve-3d; }
+    .card {
+      background: var(--ivory); border-radius: var(--radius); padding: 1.7rem;
+      border: 1px solid rgba(44,38,36,0.05); box-shadow: 0 10px 36px rgba(44,38,36,0.06); min-height: 100%;
+    }
+    .card img { width: 100%; height: 160px; object-fit: cover; border-radius: 14px; margin-bottom: 1.1rem; }
+    .card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.55rem; margin-bottom: 0.55rem; }
+    .card p { color: var(--ink-soft); font-size: 0.94rem; }
+
+    /* 3D Carousel Lavori */
+    .carousel-wrap {
+      position: relative;
+      height: min(520px, 72vh);
+      perspective: 1400px;
+      margin: 0 auto 1.5rem;
+      touch-action: pan-y;
+    }
+    .carousel-stage {
+      width: 100%; height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .carousel-slide {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: min(280px, 62vw);
+      height: min(380px, 58vh);
+      margin-left: calc(min(280px, 62vw) / -2);
+      margin-top: calc(min(380px, 58vh) / -2);
+      border-radius: 18px;
+      overflow: hidden;
+      border: 8px solid var(--ivory);
+      box-shadow: var(--shadow);
+      backface-visibility: hidden;
+      cursor: grab;
+      transition: box-shadow 0.4s ease, filter 0.4s ease;
+    }
+    .carousel-slide.active { box-shadow: 0 30px 70px rgba(44,38,36,0.18); filter: brightness(1); }
+    .carousel-slide:not(.active) { filter: brightness(0.88); }
+    .carousel-slide img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+    .carousel-caption {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 2.5rem 1rem 0.85rem;
+      background: linear-gradient(transparent, rgba(44,38,36,0.72));
+      color: var(--ivory);
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+    }
+    .carousel-controls {
+      display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem;
+    }
+    .carousel-btn {
+      width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid rgba(44,38,36,0.15);
+      background: rgba(255,250,245,0.9); cursor: pointer; font-size: 1.2rem; color: var(--ink);
+      transition: transform var(--transition), background var(--transition);
+    }
+    .carousel-btn:hover { transform: scale(1.06); background: var(--ivory); }
+    .carousel-dots { display: flex; gap: 0.45rem; flex-wrap: wrap; justify-content: center; }
+    .carousel-dot {
+      width: 8px; height: 8px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(44,38,36,0.2); transition: transform var(--transition), background var(--transition);
+    }
+    .carousel-dot.active { background: var(--rose); transform: scale(1.25); }
+
+    .prices { background: var(--charcoal); color: var(--ivory); }
+    .prices .section-head p, .prices .eyebrow { color: var(--gold-soft); }
+    .price-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.3rem; }
+    .price-card {
+      background: rgba(255,250,245,0.06); border: 1px solid rgba(224,196,138,0.25);
+      border-radius: var(--radius); padding: 1.6rem;
+    }
+    .price-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; color: var(--gold-soft); margin-bottom: 1rem; }
+    .row { display: flex; justify-content: space-between; gap: 1rem; padding: 0.45rem 0; border-bottom: 1px dotted rgba(255,250,245,0.15); font-size: 0.92rem; }
+    .row:last-child { border-bottom: none; }
+    .promo {
+      margin-top: 1.8rem; text-align: center;
+      background: linear-gradient(120deg, var(--gold), var(--gold-soft));
+      color: var(--ink); border-radius: 16px; padding: 1.1rem 1.3rem; font-weight: 500;
+    }
+
+    .corsi-box { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 2rem; align-items: center; }
+    .corsi-photo {
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow); aspect-ratio: 4/5; max-height: 420px;
+    }
+    .corsi-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2.4rem; }
+    .contact-form, .contact-info {
+      background: rgba(255,250,245,0.9); backdrop-filter: blur(12px);
+      border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow);
+    }
+    .contact-info h2 { font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; margin-bottom: 0.8rem; }
+    .contact-item { display: flex; gap: 0.85rem; margin-top: 1rem; }
+    .contact-item strong { display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rose); }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.35rem; color: var(--ink-soft); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1.5px solid rgba(44,38,36,0.1);
+      background: var(--cream); font-family: inherit; font-size: 0.95rem;
+    }
+    .form-group textarea { min-height: 110px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+
+    footer { background: #1f1b19; color: rgba(255,250,245,0.7); padding: 2.6rem 0 1.6rem; }
+    .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 1.6rem; margin-bottom: 1.6rem; }
+    .footer-brand .logo { color: var(--ivory); margin-bottom: 0.5rem; }
+    .footer-col h4 { color: var(--ivory); font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.7rem; }
+    .footer-col ul { list-style: none; font-size: 0.9rem; }
+    .footer-col li { margin-bottom: 0.4rem; }
+    .footer-bottom { border-top: 1px solid rgba(255,250,245,0.1); padding-top: 1.1rem; font-size: 0.8rem; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+    .fade-in { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-in.visible { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .nav-links {
+        position: fixed; inset: 0; background: rgba(247,241,234,0.98);
+        flex-direction: column; justify-content: center; gap: 1.6rem;
+        transform: translateX(100%); transition: transform var(--transition);
+      }
+      .nav-links.open { transform: none; }
+      .menu-toggle { display: grid; }
+      .hero-grid, .about-grid, .cards, .price-cols, .corsi-box, .contact-grid, .footer-grid { grid-template-columns: 1fr; }
+      .stack-3d { height: 420px; order: -1; }
+      .form-row { grid-template-columns: 1fr; }
+      .carousel-wrap { height: min(460px, 68vh); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <div class="page">
+    <header id="header">
+      <div class="container nav">
+        <a class="logo" href="#">Vita <span>Nails</span></a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Apri menu"><span></span></button>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#chi-sono">Chi sono</a></li>
+          <li><a href="#trattamenti">Trattamenti</a></li>
+          <li><a href="#lavori">Lavori</a></li>
+          <li><a href="#listino">Listino</a></li>
+          <li><a href="#corsi">Corsi</a></li>
+          <li><a href="#contatti" class="btn btn-primary">Prenota</a></li>
+        </ul>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="fade-in">
+          <span class="eyebrow">Onicotecnica · Roma · @vita_nails_roma</span>
+          <h1>Manicure russa, dettagli che <em>restano</em></h1>
+          <p class="hero-text">
+            Sono Vita. Studio nails a Roma: tecnica russa, materiali ipoallergenici e cura delle unghie
+            fino alla pedicure e alla podologia. Bellezza, cura, professionalità — in ogni appuntamento.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">Prenota in Direct</a>
+            <a class="btn btn-outline" href="#listino">Guarda il listino</a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat"><strong>Roma</strong><span>studio nails</span></div>
+            <div class="stat"><strong>45€</strong><span>promo nuovi clienti</span></div>
+            <div class="stat"><strong>100%</strong><span>cura e igiene</span></div>
+          </div>
+        </div>
+        <div class="stack-3d fade-in">
+          <div class="polaroid p1"><img src="vita-nails-media/748343452_18370067008225148_7537438290145286546_n.jpg" alt="Manicure baby boomer"></div>
+          <div class="polaroid p2"><img src="vita-nails-media/770005291_18374130130225148_6631666502788500696_n.jpg" alt="Trattamento cuticole"></div>
+          <img class="polaroid p3" src="vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg" alt="Vita in studio">
+          <div class="badge-3d">
+            <strong>Promo nuovi clienti</strong>
+            <p>Manicure russa + semipermanente 45€</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="chi-sono">
+      <div class="container about-grid">
+        <div class="about-photo fade-in">
+          <img src="vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg" alt="Vita, onicotecnica a Roma">
+        </div>
+        <div class="about-content fade-in">
+          <span class="eyebrow">Chi sono</span>
+          <h2>Ciao, sono Vita</h2>
+          <p>
+            Faccio manicure russa nel cuore di Roma. Non è solo smalto: è cuticola pulita, forma precisa,
+            materiali sicuri e un risultato che si riconosce da vicino.
+          </p>
+          <p>
+            In studio lavoro su manicure, pedicure e podologia. La sicurezza non è uno standard:
+            è la priorità numero uno. Prenotazioni in Direct su Instagram.
+          </p>
+          <p>
+            Accanto alle unghie porto anche il movimento: yoga e pilates, per chi vuole un percorso di cura più ampio.
+            Ma qui il centro è uno: le tue mani e i tuoi piedi, trattati come un mestiere.
+          </p>
+          <div class="chips">
+            <span class="chip">Manicure russa</span>
+            <span class="chip">Semipermanente</span>
+            <span class="chip">Pedicure</span>
+            <span class="chip">Podologia</span>
+            <span class="chip">Corsi manicure</span>
+            <span class="chip">Yoga &amp; Pilates</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trattamenti" class="services">
+      <div class="container">
+        <div class="section-head fade-in">
+          <span class="eyebrow">Trattamenti</span>
+          <h2>Lo studio nails</h2>
+          <p>Tecnica russa, igiene e dettagli. Un bel colore non basta: si vede dal prima e dopo.</p>
+        </div>
+        <div class="cards">
+          <div class="card-3d-wrap fade-in" data-tilt>
+            <article class="card">
+              <img src="vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg" alt="Manicure russa nude">
+              <h3>Manicure russa</h3>
+              <p>Tecnica moderna, cuticola a secco, forma pulita. Classico, semipermanente o copertura in gel. Anche per lui.</p>
+            </article>
+          </div>
+          <div class="card-3d-wrap fade-in" data-tilt>
+            <article class="card">
+              <img src="vita-nails-media/743118282_18369095356225148_1340770568603173321_n.jpg" alt="Pedicure professionale">
+              <h3>Pedicure</h3>
+              <p>Dita e pianta del piede, anche curativo con semipermanente. Circa un'ora e mezza quando serve un lavoro completo.</p>
+            </article>
+          </div>
+          <div class="card-3d-wrap fade-in" data-tilt>
+            <article class="card">
+              <img src="vita-nails-media/763570638_18373108366225148_2051787625624129724_n.jpg" alt="Strumenti professionali">
+              <h3>Podologia &amp; cura</h3>
+              <p>Ricostruzione ungueale, callo nucleato, fibra ritentiva, consulenza. Materiali ipoallergenici e postazione igienizzata.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lavori">
+      <div class="container">
+        <div class="section-head fade-in">
+          <span class="eyebrow">Portfolio</span>
+          <h2>Dal mio Instagram</h2>
+          <p>Lavori reali di @vita_nails_roma — scorri o trascina il carosello 3D.</p>
+        </div>
+        <div class="carousel-wrap fade-in" id="carouselWrap">
+          <div class="carousel-stage" id="carouselStage"></div>
+        </div>
+        <div class="carousel-controls fade-in">
+          <button class="carousel-btn" id="carouselPrev" aria-label="Precedente">‹</button>
+          <div class="carousel-dots" id="carouselDots"></div>
+          <button class="carousel-btn" id="carouselNext" aria-label="Successivo">›</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="listino" class="prices">
+      <div class="container">
+        <div class="section-head fade-in">
+          <span class="eyebrow">Nails &amp; Care</span>
+          <h2>Listino prezzi</h2>
+          <p>Bellezza · Cura · Professionalità — come sul listino dello studio.</p>
+        </div>
+        <div class="price-cols">
+          <div class="price-card fade-in">
+            <h3>Manicure</h3>
+            <div class="row"><span>Manicure</span><span>30€</span></div>
+            <div class="row"><span>Manicure + smalto classico</span><span>35€</span></div>
+            <div class="row"><span>Manicure + semipermanente</span><span>55€</span></div>
+            <div class="row"><span>Manicure + gel (ritocco)</span><span>65€</span></div>
+            <div class="row"><span>French art</span><span>+10€</span></div>
+            <div class="row"><span>Nail art</span><span>5–15€</span></div>
+            <div class="row"><span>Rimozione lavoro precedente</span><span>5–15€</span></div>
+            <div class="row"><span>Manicure uomo</span><span>30€</span></div>
+          </div>
+          <div class="price-card fade-in">
+            <h3>Pedicure</h3>
+            <div class="row"><span>Pedicure (dita + pianta)</span><span>55€</span></div>
+            <div class="row"><span>Pedicure + smalto classico</span><span>60€</span></div>
+            <div class="row"><span>Pedicure + semipermanente</span><span>65€</span></div>
+            <div class="row"><span>Rimozione lavoro precedente</span><span>5–15€</span></div>
+            <div class="row"><span>Pedicure uomo</span><span>60€</span></div>
+          </div>
+          <div class="price-card fade-in">
+            <h3>Podologia</h3>
+            <div class="row"><span>Ricostruzione ungueale (1 unghia)</span><span>10€</span></div>
+            <div class="row"><span>Trattamento ungueale</span><span>5–25€</span></div>
+            <div class="row"><span>Rimozione callo nucleato</span><span>5–10€</span></div>
+            <div class="row"><span>Fibra ritentiva</span><span>40€</span></div>
+            <div class="row"><span>Consulenza (senza trattamento)</span><span>15€</span></div>
+          </div>
+        </div>
+        <div class="promo fade-in">Nuovi clienti: manicure russa con semipermanente a 45€. Scrivi in Direct per la data.</div>
+      </div>
+    </section>
+
+    <section id="corsi">
+      <div class="container corsi-box">
+        <div class="fade-in">
+          <span class="eyebrow">Formazione</span>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,2.7rem);font-weight:400;margin:0 0 1rem;">Corsi di manicure russa</h2>
+          <p style="color:var(--ink-soft);margin-bottom:1rem;">
+            Insegno la tecnica in studio. I lavori delle allieve — come @mimimaninails — restano nel feed:
+            taglio, igiene, forma e semipermanente, passo dopo passo.
+          </p>
+          <p style="color:var(--ink-soft);margin-bottom:1.4rem;">
+            Se vuoi imparare la manicure russa a Roma, scrivimi. Posti limitati, lezioni pratiche.
+          </p>
+          <a class="btn btn-gold" href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">Chiedi info sui corsi</a>
+        </div>
+        <div class="corsi-photo fade-in">
+          <img src="vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg" alt="Lavoro di allieva corso manicure">
+        </div>
+      </div>
+    </section>
+
+    <section id="contatti">
+      <div class="container contact-grid">
+        <div class="contact-info fade-in">
+          <span class="eyebrow">Contatti</span>
+          <h2>Prenota da Vita</h2>
+          <p style="color:var(--ink-soft);">Le prenotazioni passano da Instagram Direct. Ti rispondo lì per data e trattamento.</p>
+          <div class="contact-item"><div><strong>Instagram</strong><a href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">@vita_nails_roma</a></div></div>
+          <div class="contact-item"><div><strong>Città</strong>Roma — manicure russa, pedicure, podologia</div></div>
+          <div class="contact-item"><div><strong>Threads</strong><a href="https://www.threads.com/@vita_nails_roma" target="_blank" rel="noopener">@vita_nails_roma</a></div></div>
+          <div class="contact-item"><div><strong>Altro</strong>Yoga e pilates su richiesta, sempre tramite Direct</div></div>
+        </div>
+        <form class="contact-form fade-in" id="contactForm">
+          <div class="form-row">
+            <div class="form-group"><label for="nome">Nome</label><input id="nome" required placeholder="Il tuo nome"></div>
+            <div class="form-group"><label for="ig">Instagram</label><input id="ig" placeholder="@tuo_profilo"></div>
+          </div>
+          <div class="form-group">
+            <label for="servizio">Trattamento</label>
+            <select id="servizio">
+              <option>Manicure russa + semipermanente (promo 45€)</option>
+              <option>Manicure</option>
+              <option>Pedicure</option>
+              <option>Podologia</option>
+              <option>Corso manicure</option>
+              <option>Yoga / Pilates</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="msg">Messaggio</label>
+            <textarea id="msg" placeholder="Giorno preferito, prima volta o ritocco..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%">Apri Direct Instagram</button>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="logo">Vita <span>Nails</span></div>
+            <p>Onicotecnica a Roma. Manicure russa, pedicure, podologia. Prenditi cura di te.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Studio</h4>
+            <ul>
+              <li><a href="#trattamenti">Trattamenti</a></li>
+              <li><a href="#listino">Listino</a></li>
+              <li><a href="#corsi">Corsi</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Social</h4>
+            <ul>
+              <li><a href="https://www.instagram.com/vita_nails_roma/" target="_blank" rel="noopener">Instagram</a></li>
+              <li><a href="https://www.threads.com/@vita_nails_roma" target="_blank" rel="noopener">Threads</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© 2026 Vita Nails Roma — Nails &amp; Care</span>
+          <span>Foto da @vita_nails_roma</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const header = document.getElementById('header');
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let mx = 0, my = 0;
+
+    window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 40));
+    document.addEventListener('mousemove', e => {
+      mx = (e.clientX / innerWidth - 0.5) * 2;
+      my = (e.clientY / innerHeight - 0.5) * 2;
+    });
+    menuToggle.addEventListener('click', () => {
+      menuToggle.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      menuToggle.classList.remove('open');
+      navLinks.classList.remove('open');
+    }));
+
+    document.querySelectorAll('[data-tilt]').forEach(wrap => {
+      wrap.addEventListener('mousemove', e => {
+        const r = wrap.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        wrap.style.transform = `rotateX(${-y * 12}deg) rotateY(${x * 12}deg)`;
+      });
+      wrap.addEventListener('mouseleave', () => { wrap.style.transform = ''; });
+    });
+
+    const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('visible')), { threshold: 0.12 });
+    document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+    document.getElementById('contactForm').addEventListener('submit', e => {
+      e.preventDefault();
+      window.open('https://www.instagram.com/vita_nails_roma/', '_blank', 'noopener');
+    });
+
+    const portfolio = [
+      { src: 'vita-nails-media/748343452_18370067008225148_7537438290145286546_n.jpg', alt: 'Ombré baby boomer', cap: 'Manicure ombré baby boomer' },
+      { src: 'vita-nails-media/499983744_1216972646595002_269551529892878755_n.jpg', alt: 'Nude glitter', cap: 'Nude con glitter sottili' },
+      { src: 'vita-nails-media/623090306_18344774293225148_8290666929850416444_n.jpg', alt: 'Bordeaux lucido', cap: 'Semipermanente bordeaux' },
+      { src: 'vita-nails-media/500423906_18313195303225148_2750952574447067859_n.jpg', alt: 'French milk', cap: 'French milk glossy' },
+      { src: 'vita-nails-media/770005291_18374130130225148_6631666502788500696_n.jpg', alt: 'Trattamento cuticole', cap: 'Cura cuticole e olio' },
+      { src: 'vita-nails-media/743118282_18369095356225148_1340770568603173321_n.jpg', alt: 'Pedicure', cap: 'Pedicure professionale' },
+      { src: 'vita-nails-media/763570638_18373108366225148_2051787625624129724_n.jpg', alt: 'Strumenti', cap: 'Strumenti e igiene in cabina' }
+    ];
+
+    const stage = document.getElementById('carouselStage');
+    const dotsWrap = document.getElementById('carouselDots');
+    let index = 0;
+    let dragStartX = 0;
+    let dragging = false;
+    let autoTimer;
+
+    portfolio.forEach((item, i) => {
+      const slide = document.createElement('div');
+      slide.className = 'carousel-slide' + (i === 0 ? ' active' : '');
+      slide.innerHTML = `<img src="${item.src}" alt="${item.alt}"><div class="carousel-caption">${item.cap}</div>`;
+      stage.appendChild(slide);
+
+      const dot = document.createElement('button');
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.setAttribute('aria-label', `Slide ${i + 1}`);
+      dot.addEventListener('click', () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+
+    const slides = [...stage.children];
+    const dots = [...dotsWrap.children];
+    const radius = Math.min(420, innerWidth * 0.34);
+
+    function layout() {
+      slides.forEach((slide, i) => {
+        const angle = ((i - index) / portfolio.length) * Math.PI * 2;
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius - radius;
+        const rotY = -angle * (180 / Math.PI);
+        slide.style.transform = `translate3d(${x}px, 0, ${z}px) rotateY(${rotY}deg)`;
+        slide.classList.toggle('active', i === index);
+      });
+      dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+    }
+
+    function goTo(i) {
+      index = (i + portfolio.length) % portfolio.length;
+      layout();
+      resetAuto();
+    }
+
+    function next() { goTo(index + 1); }
+    function prev() { goTo(index - 1); }
+
+    document.getElementById('carouselNext').addEventListener('click', next);
+    document.getElementById('carouselPrev').addEventListener('click', prev);
+
+    const wrap = document.getElementById('carouselWrap');
+    wrap.addEventListener('pointerdown', e => { dragging = true; dragStartX = e.clientX; wrap.setPointerCapture(e.pointerId); });
+    wrap.addEventListener('pointerup', e => {
+      if (!dragging) return;
+      const dx = e.clientX - dragStartX;
+      if (Math.abs(dx) > 40) (dx < 0 ? next : prev)();
+      dragging = false;
+    });
+    wrap.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      stage.style.transform = `rotateY(${(e.clientX - dragStartX) * 0.08}deg)`;
+    });
+    wrap.addEventListener('pointerup', () => { stage.style.transform = ''; });
+
+    function resetAuto() {
+      clearInterval(autoTimer);
+      if (!reduced) autoTimer = setInterval(next, 4500);
+    }
+
+    addEventListener('resize', layout);
+    layout();
+    resetAuto();
+
+    function initBg() {
+      const canvas = document.getElementById('bg-canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
+      camera.position.set(0, 0.4, 6);
+      scene.add(new THREE.AmbientLight(0xfff5ee, 0.9));
+      const d = new THREE.DirectionalLight(0xffffff, 0.85); d.position.set(3, 4, 5); scene.add(d);
+
+      const colors = [0xc48b86, 0xc5a059, 0xe8c4c0, 0x3a3330];
+      const objects = [];
+      for (let i = 0; i < 14; i++) {
+        const mesh = new THREE.Mesh(
+          i % 2 ? new THREE.SphereGeometry(0.1, 16, 16) : new THREE.IcosahedronGeometry(0.14, 0),
+          new THREE.MeshStandardMaterial({ color: colors[i % colors.length], roughness: 0.4, metalness: 0.25, transparent: true, opacity: 0.24 })
+        );
+        mesh.position.set((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 8 - 3);
+        mesh.userData.s = 0.3 + Math.random() * 0.5;
+        objects.push(mesh);
+        scene.add(mesh);
+      }
+
+      function resize() {
+        renderer.setSize(innerWidth, innerHeight);
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      addEventListener('resize', resize);
+
+      let t = 0;
+      function loop() {
+        requestAnimationFrame(loop);
+        t += 0.016;
+        objects.forEach((m, i) => {
+          m.rotation.y += 0.004 * m.userData.s;
+          m.position.y += Math.sin(t * m.userData.s + i) * 0.002;
+        });
+        camera.position.x = mx * 0.35;
+        camera.position.y = my * 0.15;
+        camera.lookAt(0, 0, -2);
+        renderer.render(scene, camera);
+      }
+      if (!reduced) loop(); else renderer.render(scene, camera);
+    }
+    initBg();
+  </script>
+</body>
+</html>
