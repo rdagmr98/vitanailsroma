@@ -38,20 +38,20 @@
     img { max-width: 100%; display: block; }
     .container { width: min(1140px, calc(100% - 2.4rem)); margin-inline: auto; }
 
-    body::before {
-      content: '';
-      position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.45;
-      background:
-        radial-gradient(circle at 18% 28%, rgba(196, 139, 134, 0.35), transparent 52%),
-        radial-gradient(circle at 82% 72%, rgba(197, 160, 89, 0.28), transparent 48%),
-        radial-gradient(circle at 55% 48%, rgba(232, 196, 192, 0.22), transparent 58%);
-      animation: bgShift 20s ease-in-out infinite alternate;
-    }
-    @keyframes bgShift {
-      0% { transform: scale(1) translate(0, 0); }
-      100% { transform: scale(1.06) translate(-1.5%, 1%); }
-    }
+    #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.42; }
     .page { position: relative; z-index: 2; }
+
+    .toast {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(120%);
+      z-index: 200; max-width: min(420px, calc(100% - 2rem));
+      padding: 0.95rem 1.25rem; border-radius: 14px;
+      background: var(--charcoal); color: var(--ivory);
+      box-shadow: 0 16px 40px rgba(44, 38, 36, 0.28);
+      font-size: 0.92rem; text-align: center;
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
 
     header {
       position: fixed; inset: 0 0 auto 0; z-index: 100; padding: 1.15rem 0;
@@ -312,6 +312,8 @@
   </style>
 </head>
 <body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div class="page">
     <header id="header">
       <div class="container nav">
@@ -344,7 +346,7 @@
           <div class="hero-stats">
             <div class="stat"><strong>Roma</strong><span>studio nails</span></div>
             <div class="stat"><strong>45€</strong><span>promo nuovi clienti</span></div>
-            <div class="stat"><strong>100%</strong><span>cura e igiene</span></div>
+            <div class="stat"><strong>100%</strong><span>materiali ipoallergenici</span></div>
           </div>
         </div>
         <div class="stack-3d fade-in">
@@ -516,13 +518,10 @@
           <div class="contact-item"><div><strong>Altro</strong>Yoga e pilates su richiesta, sempre tramite Direct</div></div>
         </div>
         <form class="contact-form fade-in" id="contactForm">
-          <div class="form-row">
-            <div class="form-group"><label for="nome">Nome</label><input id="nome" required placeholder="Il tuo nome"></div>
-            <div class="form-group"><label for="ig">Instagram</label><input id="ig" placeholder="@tuo_profilo"></div>
-          </div>
+          <div class="form-group"><label for="nome">Nome</label><input id="nome" name="nome" required placeholder="Il tuo nome"></div>
           <div class="form-group">
             <label for="servizio">Trattamento</label>
-            <select id="servizio">
+            <select id="servizio" name="servizio" required>
               <option>Manicure russa + semipermanente (promo 45€)</option>
               <option>Manicure</option>
               <option>Pedicure</option>
@@ -532,10 +531,10 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="msg">Messaggio</label>
-            <textarea id="msg" placeholder="Giorno preferito, prima volta o ritocco..."></textarea>
+            <label for="msg">Messaggio <span style="font-weight:400;text-transform:none;letter-spacing:0">(opzionale)</span></label>
+            <textarea id="msg" name="msg" placeholder="Giorno preferito, prima volta o ritocco..."></textarea>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%">Apri Direct Instagram</button>
+          <button type="submit" class="btn btn-primary" style="width:100%">Prenota su Instagram Direct</button>
         </form>
       </div>
     </section>
@@ -571,13 +570,28 @@
     </footer>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
     const header = document.getElementById('header');
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.getElementById('navLinks');
+    const toast = document.getElementById('toast');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let mx = 0, my = 0;
 
     window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 40));
+    document.addEventListener('mousemove', e => {
+      mx = (e.clientX / innerWidth - 0.5) * 2;
+      my = (e.clientY / innerHeight - 0.5) * 2;
+    });
+
+    let toastTimer;
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
+    }
     menuToggle.addEventListener('click', () => {
       menuToggle.classList.toggle('open');
       navLinks.classList.toggle('open');
@@ -600,9 +614,21 @@
     const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('visible')), { threshold: 0.12 });
     document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
 
-    document.getElementById('contactForm').addEventListener('submit', e => {
+    document.getElementById('contactForm').addEventListener('submit', async e => {
       e.preventDefault();
-      window.open('https://www.instagram.com/vita_nails_roma/', '_blank', 'noopener');
+      const nome = document.getElementById('nome').value.trim();
+      const trattamento = document.getElementById('servizio').value;
+      const extra = document.getElementById('msg').value.trim();
+      let text = `Ciao Vita! Sono ${nome}. Vorrei prenotare: ${trattamento}.`;
+      if (extra) text += ` ${extra}`;
+      text += ' Grazie!';
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Messaggio copiato — incolla in Direct Instagram');
+      } catch {
+        showToast('Copia il messaggio e incollalo in Direct Instagram');
+      }
+      window.open('https://ig.me/m/vita_nails_roma', '_blank', 'noopener');
     });
 
     const portfolio = [
@@ -647,10 +673,6 @@
 
     function layoutRing() {
       radius = Math.min(420, innerWidth * 0.34);
-      slides.forEach((slide, i) => {
-        const angle = i * stepDeg;
-        slide.style.transform = `rotateY(${angle}deg) translateZ(${radius}px) rotateY(${-angle}deg)`;
-      });
     }
 
     function activeIndex() {
@@ -659,9 +681,14 @@
     }
 
     function render() {
-      stage.style.transform = `rotateX(-10deg) rotateY(${rotation}deg)`;
+      stage.style.transform = 'rotateX(-10deg)';
       const active = activeIndex();
-      slides.forEach((slide, i) => slide.classList.toggle('active', i === active));
+      slides.forEach((slide, i) => {
+        const deg = i * stepDeg + rotation;
+        const rad = deg * Math.PI / 180;
+        slide.style.transform = `translate3d(${Math.sin(rad) * radius}px, 0, ${Math.cos(rad) * radius - radius}px) rotateY(${-deg}deg)`;
+        slide.classList.toggle('active', i === active);
+      });
       dots.forEach((dot, i) => dot.classList.toggle('active', i === active));
     }
 
@@ -737,6 +764,73 @@
     layoutRing();
     render();
     tick();
+
+    function initBg() {
+      const canvas = document.getElementById('bg-canvas');
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 80);
+      camera.position.set(0, 0.4, 6);
+      scene.add(new THREE.AmbientLight(0xfff5ee, 0.9));
+      const d = new THREE.DirectionalLight(0xffffff, 0.85);
+      d.position.set(3, 4, 5);
+      scene.add(d);
+
+      const colors = [0xc48b86, 0xc5a059, 0xe8c4c0, 0x3a3330];
+      const objects = [];
+      for (let i = 0; i < 32; i++) {
+        const kind = i % 3;
+        const geo = kind === 0
+          ? new THREE.SphereGeometry(0.06 + Math.random() * 0.08, 12, 12)
+          : kind === 1
+            ? new THREE.IcosahedronGeometry(0.08 + Math.random() * 0.1, 0)
+            : new THREE.TetrahedronGeometry(0.07 + Math.random() * 0.09, 0);
+        const mesh = new THREE.Mesh(
+          geo,
+          new THREE.MeshStandardMaterial({
+            color: colors[i % colors.length],
+            roughness: 0.45,
+            metalness: 0.2,
+            transparent: true,
+            opacity: 0.18 + Math.random() * 0.12
+          })
+        );
+        mesh.position.set((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 11, (Math.random() - 0.5) * 9 - 3);
+        mesh.userData.s = 0.25 + Math.random() * 0.55;
+        mesh.userData.p = Math.random() * Math.PI * 2;
+        objects.push(mesh);
+        scene.add(mesh);
+      }
+
+      function resize() {
+        renderer.setSize(innerWidth, innerHeight);
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+      }
+      resize();
+      addEventListener('resize', resize);
+
+      let t = 0;
+      function loop() {
+        requestAnimationFrame(loop);
+        t += 0.016;
+        objects.forEach((m, i) => {
+          m.rotation.x += 0.003 * m.userData.s;
+          m.rotation.y += 0.005 * m.userData.s;
+          m.position.y += Math.sin(t * m.userData.s + m.userData.p) * 0.0025;
+          m.position.x += Math.cos(t * 0.6 * m.userData.s + i) * 0.0012;
+        });
+        camera.position.x = mx * 0.35;
+        camera.position.y = 0.4 + my * 0.15;
+        camera.lookAt(0, 0, -2);
+        renderer.render(scene, camera);
+      }
+      if (!reduced) loop();
+      else renderer.render(scene, camera);
+    }
+    initBg();
   </script>
 </body>
 </html>
