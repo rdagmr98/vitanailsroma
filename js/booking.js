@@ -1,13 +1,13 @@
-const DATA = "https://raw.githubusercontent.com/rdagmr98/vitanailsroma/main/data";
+const SLOT_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+const TIME_RE = /^\d{2}:\d{2}$/;
+const CODE_RE = /^VN-[A-F0-9]{6}$/;
 
 function bust(url) {
-  return url + "?t=" + Date.now();
+  return url + (url.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now();
 }
 
-async function loadJson(name) {
-  const r = await fetch(bust(`${DATA}/${name}`));
-  if (!r.ok) throw new Error(name);
-  return r.json();
+function apiReady() {
+  return !!(window.VITA_GH && window.VITA_GH.token);
 }
 
 async function sha256hex(s) {
@@ -15,19 +15,11 @@ async function sha256hex(s) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function dispatch(type, payload) {
-  const token = window.VITA_DISPATCH_TOKEN;
-  if (!token) throw new Error("notoken");
-  const r = await fetch("https://api.github.com/repos/rdagmr98/vitanailsroma/dispatches", {
-    method: "POST",
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: "Bearer " + token,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-    body: JSON.stringify({ event_type: type, client_payload: payload }),
-  });
-  if (!r.ok) throw new Error("dispatch");
+async function loadJson(name) {
+  if (!apiReady()) throw new Error("noapi");
+  const f = await VitaGhDb.getFile(name);
+  if (!f.data) throw new Error(name);
+  return f.data;
 }
 
 function expandSlots(cfg, occupied) {
@@ -48,14 +40,166 @@ function expandSlots(cfg, occupied) {
   return out;
 }
 
-async function pollCode(code, tries = 24) {
-  for (let i = 0; i < tries; i++) {
-    await new Promise(r => setTimeout(r, 5000));
-    const av = await loadJson("availability.json");
-    const row = av.codes && av.codes[code];
-    if (row) return { code, ...row };
+function publicAvailability(bookings) {
+  const occupied = [];
+  const codes = {};
+  for (const b of bookings) {
+    if (b.status === "pending" || b.status === "confirmed") {
+      if (!occupied.includes(b.slotId)) occupied.push(b.slotId);
+    }
+    if (["pending", "confirmed", "declined", "expired"].includes(b.status)) {
+      codes[b.code] = { status: b.status, slotId: b.slotId };
+    }
   }
-  return null;
+  occupied.sort();
+  return { occupied, codes };
 }
 
-window.VitaBook = { loadJson, sha256hex, dispatch, expandSlots, pollCode };
+function expirePending(bookings, hours) {
+  const cut = Date.now() - hours * 3600 * 1000;
+  for (const b of bookings) {
+    if (b.status === "pending" && new Date(b.createdAt).getTime() < cut) b.status = "expired";
+  }
+}
+
+function occupied(bookings, slotId) {
+  return bookings.some(b => b.slotId === slotId && (b.status === "pending" || b.status === "confirmed"));
+}
+
+function newCode(bookings, raw) {
+  raw = String(raw || "").trim().toUpperCase();
+  let code = CODE_RE.test(raw)
+    ? raw
+    : "VN-" + [...crypto.getRandomValues(new Uint8Array(3))].map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+  if (bookings.some(b => b.code === code)) throw new Error("code");
+  return code;
+}
+
+async function syncPublic(bookings) {
+  const av = publicAvailability(bookings);
+  await VitaGhDb.writeWithRetry("availability.json", () => av, "vita: availability");
+  return av;
+}
+
+async function requireAdmin(p) {
+  const admin = await loadJson("admin.json");
+  if ((p.adminId || "") !== admin.id) throw new Error("auth");
+  if ((await sha256hex(p.password || "")) !== admin.passwordSha256) throw new Error("auth");
+}
+
+async function api(op, p) {
+  if (!apiReady()) throw new Error("noapi");
+
+  if (op === "book") {
+    const name = String(p.name || "").trim();
+    const slot = p.slotId || "";
+    const svc = p.serviceId || "";
+    if (!name || name.length > 80 || !SLOT_RE.test(slot)) throw new Error("invalid");
+    const services = await loadJson("services.json");
+    if (!services.some(s => s.id === svc)) throw new Error("service");
+    const slots = await loadJson("slots.json");
+    let codeOut = "";
+    const data = await VitaGhDb.writeWithRetry("bookings.json", (cur) => {
+      const root = cur && Array.isArray(cur.bookings) ? cur : { bookings: [] };
+      expirePending(root.bookings, slots.pendingHours || 48);
+      if (root.bookings.filter(b => b.status === "pending").length >= 40) throw new Error("busy");
+      if (occupied(root.bookings, slot)) throw new Error("taken");
+      const code = newCode(root.bookings, p.code);
+      codeOut = code;
+      root.bookings.push({
+        id: code, code, slotId: slot, serviceId: svc, name,
+        note: String(p.note || "").slice(0, 200),
+        status: "pending", source: "online",
+        createdAt: new Date().toISOString(),
+      });
+      return root;
+    }, "vita: book");
+    await syncPublic(data.bookings);
+    return { ok: true, code: codeOut, status: "pending", slotId: slot };
+  }
+
+  if (op === "admin_book") {
+    await requireAdmin(p);
+    const name = String(p.name || "").trim();
+    const slot = p.slotId || "";
+    const svc = p.serviceId || "";
+    if (!name || name.length > 80 || !SLOT_RE.test(slot)) throw new Error("invalid");
+    const services = await loadJson("services.json");
+    if (!services.some(s => s.id === svc)) throw new Error("service");
+    const slots = await loadJson("slots.json");
+    let codeOut = "";
+    const data = await VitaGhDb.writeWithRetry("bookings.json", (cur) => {
+      const root = cur && Array.isArray(cur.bookings) ? cur : { bookings: [] };
+      expirePending(root.bookings, slots.pendingHours || 48);
+      if (occupied(root.bookings, slot)) throw new Error("taken");
+      const code = newCode(root.bookings, p.code);
+      codeOut = code;
+      root.bookings.push({
+        id: code, code, slotId: slot, serviceId: svc, name,
+        note: String(p.note || "").slice(0, 200),
+        status: "confirmed",
+        source: String(p.source || "voce").slice(0, 40),
+        createdAt: new Date().toISOString(),
+      });
+      return root;
+    }, "vita: admin_book");
+    await syncPublic(data.bookings);
+    return { ok: true, code: codeOut, status: "confirmed", slotId: slot };
+  }
+
+  if (op === "accept" || op === "decline" || op === "cancel") {
+    await requireAdmin(p);
+    const data = await VitaGhDb.writeWithRetry("bookings.json", (cur) => {
+      const root = cur && Array.isArray(cur.bookings) ? cur : { bookings: [] };
+      const b = root.bookings.find(x => x.code === p.code);
+      if (!b) throw new Error("notfound");
+      if (op === "accept") {
+        if (b.status !== "pending") throw new Error("notfound");
+        if (root.bookings.some(x => x.slotId === b.slotId && x.status === "confirmed" && x.code !== b.code)) {
+          throw new Error("taken");
+        }
+        b.status = "confirmed";
+      } else if (op === "decline") {
+        if (b.status !== "pending") throw new Error("notfound");
+        b.status = "declined";
+      } else {
+        if (b.status !== "pending" && b.status !== "confirmed") throw new Error("notfound");
+        b.status = "cancelled";
+      }
+      return root;
+    }, "vita: " + op);
+    await syncPublic(data.bookings);
+    return { ok: true, code: p.code };
+  }
+
+  if (op === "change_password") {
+    await requireAdmin(p);
+    const neu = p.newPassword || "";
+    if (neu.length < 10) throw new Error("weak");
+    const hash = await sha256hex(neu);
+    await VitaGhDb.writeWithRetry("admin.json", (cur) => ({
+      id: (cur && cur.id) || p.adminId,
+      passwordSha256: hash,
+    }), "vita: password");
+    return { ok: true };
+  }
+
+  if (op === "update_slots") {
+    await requireAdmin(p);
+    const slots = p.slots || {};
+    const days = slots.weekdays;
+    const times = slots.times;
+    const weeks = parseInt(slots.weeksAhead, 10) || 4;
+    const hours = parseInt(slots.pendingHours, 10) || 48;
+    if (!Array.isArray(days) || !days.length || days.some(d => d < 0 || d > 6)) throw new Error("slots");
+    if (!Array.isArray(times) || !times.length || times.some(t => !TIME_RE.test(String(t)))) throw new Error("slots");
+    if (weeks < 1 || weeks > 12 || hours < 1 || hours > 168) throw new Error("slots");
+    const next = { weekdays: days, times, weeksAhead: weeks, pendingHours: hours };
+    await VitaGhDb.writeWithRetry("slots.json", () => next, "vita: slots");
+    return { ok: true };
+  }
+
+  throw new Error("op");
+}
+
+window.VitaBook = { loadJson, sha256hex, api, expandSlots, apiReady, bust };

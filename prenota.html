@@ -48,7 +48,8 @@
       <p id="lookupOut"></p>
     </div>
   </div>
-  <script src="js/dispatch-token.js"></script>
+  <script src="js/runtime-config.js"></script>
+  <script src="js/ghdb.js"></script>
   <script src="js/booking.js"></script>
   <script>
     const I18N = {
@@ -59,13 +60,13 @@
         service: "Trattamento", slots: "Orari", name: "Nome", note: "Nota (opzionale)",
         book: "Richiedi prenotazione", lookup: "Hai già un codice?", check: "Controlla stato",
         taken: "occupato", free: "libero",
-        errToken: "Prenotazione online non attiva: manca il token GitHub (dispatch). Contatta chi gestisce il sito.",
+        errToken: "Prenotazione online non attiva. Contatta chi gestisce il sito.",
         errTaken: "Slot appena occupato, scegline un altro.",
         err: "Richiesta non inviata. Riprova o usa Instagram.",
-        wait: "Invio in corso (1–2 minuti)...",
+        wait: "Invio in corso...",
         done: (c) => `Richiesta inviata. Conserva il codice ${c} — in attesa di Vita.`,
         noSlot: "Scegli data/ora e scrivi il nome.",
-        notfound: "Codice non trovato (attendi un minuto se l'hai appena inviato).",
+        notfound: "Codice non trovato.",
         st: { pending: "in attesa", confirmed: "confermata", declined: "rifiutata", expired: "scaduta", cancelled: "annullata" }
       },
       ru: {
@@ -75,10 +76,10 @@
         service: "Процедура", slots: "Время", name: "Имя", note: "Заметка (необязательно)",
         book: "Отправить заявку", lookup: "Уже есть код?", check: "Проверить статус",
         taken: "занято", free: "свободно",
-        errToken: "Онлайн-запись не активна (нет GitHub token). Напишите в Instagram.",
+        errToken: "Онлайн-запись не активна. Напишите в Instagram.",
         errTaken: "Слот только что заняли, выберите другой.",
         err: "Не удалось отправить. Повторите или Instagram.",
-        wait: "Отправка (1–2 минуты)...",
+        wait: "Отправка...",
         done: (c) => `Заявка отправлена. Код ${c} — ожидание Виты.`,
         noSlot: "Выберите время и укажите имя.",
         notfound: "Код не найден.",
@@ -130,19 +131,16 @@
       err.hidden = ok.hidden = true;
       const name = document.getElementById("name").value.trim();
       if (!sel || !name) { err.hidden = false; err.textContent = t.noSlot; return; }
-      if (!window.VITA_DISPATCH_TOKEN) { err.hidden = false; err.textContent = t.errToken; return; }
       const code = newCode();
       ok.hidden = false; ok.textContent = t.wait;
       try {
-        await VitaBook.dispatch("book", { name, slotId: sel, serviceId: service.value, note: note.value.trim(), code });
-        const b = await VitaBook.pollCode(code);
-        if (!b) { err.hidden = false; err.textContent = t.err; ok.hidden = true; return; }
-        if (b.status === "pending") ok.textContent = t.done(code);
+        const b = await VitaBook.api("book", { name, slotId: sel, serviceId: service.value, note: note.value.trim(), code });
+        if (b.status === "pending") ok.textContent = t.done(b.code || code);
         else { err.hidden = false; err.textContent = t.errTaken; ok.hidden = true; }
         await renderSlots();
       } catch (e) {
         err.hidden = false;
-        err.textContent = e.message === "notoken" ? t.errToken : t.err;
+        err.textContent = e.message === "noapi" ? t.errToken : (e.message === "taken" ? t.errTaken : t.err);
         ok.hidden = true;
       }
     });
