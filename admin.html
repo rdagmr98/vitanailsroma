@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>Admin — Vita Nails</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/booking.css">
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <a class="logo" href="index.html">Vita <span>Nails</span></a>
+    </div>
+    <h1>Admin</h1>
+    <div class="card" id="loginCard">
+      <label>Id</label>
+      <input id="adminId" autocomplete="username">
+      <label>Password</label>
+      <input id="adminPw" type="password" autocomplete="current-password">
+      <div class="row"><button type="button" class="btn btn-primary" id="loginBtn">Entra</button></div>
+      <p class="err" id="loginErr" hidden>Id o password non validi.</p>
+    </div>
+    <div id="app" hidden>
+      <div class="card">
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">In attesa</h2>
+        <div id="pending"></div>
+      </div>
+      <div class="card">
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Orari (JSON)</h2>
+        <textarea id="slotsJson" rows="8"></textarea>
+        <div class="row"><button type="button" class="btn btn-outline" id="saveSlots">Salva orari</button></div>
+      </div>
+      <div class="card">
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Cambia password</h2>
+        <label>Nuova password (min. 10)</label>
+        <input id="newPw" type="password">
+        <div class="row"><button type="button" class="btn btn-outline" id="savePw">Aggiorna password</button></div>
+      </div>
+      <p class="ok" id="msg" hidden></p>
+      <p class="err" id="err" hidden></p>
+    </div>
+  </div>
+  <script src="js/dispatch-token.js"></script>
+  <script src="js/booking.js"></script>
+  <script>
+    let cred = null;
+    const svcMap = {};
+
+    function show(okTxt, errTxt) {
+      msg.hidden = !okTxt; err.hidden = !errTxt;
+      if (okTxt) msg.textContent = okTxt;
+      if (errTxt) err.textContent = errTxt;
+    }
+
+    async function authOk(id, pw) {
+      const admin = await VitaBook.loadJson("admin.json");
+      const h = await VitaBook.sha256hex(pw);
+      return id === admin.id && h === admin.passwordSha256;
+    }
+
+    async function refresh() {
+      const [data, services, slots] = await Promise.all([
+        VitaBook.loadJson("bookings.json"),
+        VitaBook.loadJson("services.json"),
+        VitaBook.loadJson("slots.json"),
+      ]);
+      services.forEach(s => { svcMap[s.id] = s.it; });
+      slotsJson.value = JSON.stringify(slots, null, 2);
+      const list = data.bookings.filter(b => b.status === "pending");
+      pending.innerHTML = list.map(b =>
+        `<div class="pending-item">
+          <div><code>${b.code}</code> · ${b.name}<br><small>${b.slotId} · ${svcMap[b.serviceId] || b.serviceId}</small></div>
+          <div class="row">
+            <button type="button" class="btn btn-gold" data-op="accept" data-code="${b.code}">Accetta</button>
+            <button type="button" class="btn btn-danger" data-op="decline" data-code="${b.code}">Rifiuta</button>
+          </div>
+        </div>`
+      ).join("") || "<p>Nessuna richiesta.</p>";
+      document.querySelectorAll("[data-op]").forEach(btn => btn.addEventListener("click", () => decide(btn.dataset.op, btn.dataset.code)));
+    }
+
+    async function decide(op, code) {
+      show("Invio...", "");
+      try {
+        await VitaBook.dispatch(op, { adminId: cred.id, password: cred.pw, code });
+        await new Promise(r => setTimeout(r, 12000));
+        show("Richiesta inviata. Se la lista non cambia, attendi e ricarica.", "");
+        await refresh();
+      } catch (e) {
+        show("", e.message === "notoken" ? "Manca il token dispatch. Vedi nota Obsidian." : "Invio fallito.");
+      }
+    }
+
+    loginBtn.addEventListener("click", async () => {
+      loginErr.hidden = true;
+      const id = adminId.value.trim();
+      const pw = adminPw.value;
+      if (!(await authOk(id, pw))) { loginErr.hidden = false; return; }
+      cred = { id, pw };
+      loginCard.hidden = true;
+      app.hidden = false;
+      await refresh();
+    });
+
+    saveSlots.addEventListener("click", async () => {
+      try {
+        const slots = JSON.parse(slotsJson.value);
+        await VitaBook.dispatch("update_slots", { adminId: cred.id, password: cred.pw, slots });
+        show("Orari inviati. Attendi 1–2 minuti.", "");
+      } catch {
+        show("", "JSON non valido o invio fallito.");
+      }
+    });
+
+    savePw.addEventListener("click", async () => {
+      const n = newPw.value;
+      if (n.length < 10) { show("", "Minimo 10 caratteri."); return; }
+      try {
+        await VitaBook.dispatch("change_password", { adminId: cred.id, password: cred.pw, newPassword: n });
+        cred.pw = n;
+        show("Password inviata. Dal prossimo accesso usa la nuova. Cambiala anche tu a memoria.", "");
+      } catch {
+        show("", "Invio fallito.");
+      }
+    });
+  </script>
+</body>
+</html>

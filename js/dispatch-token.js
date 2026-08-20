@@ -1,0 +1,1 @@
+window.VITA_DISPATCH_TOKEN = "";

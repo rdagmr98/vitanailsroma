@@ -1,0 +1,18 @@
+[
+  {"id": "promo", "price": "45€", "it": "Manicure russa + semipermanente (promo)", "ru": "Русский маникюр + гель-лак (акция)"},
+  {"id": "manicure", "price": "30€", "it": "Manicure", "ru": "Маникюр"},
+  {"id": "manicure-classico", "price": "35€", "it": "Manicure + smalto classico", "ru": "Маникюр + обычный лак"},
+  {"id": "manicure-semi", "price": "55€", "it": "Manicure + semipermanente", "ru": "Маникюр + гель-лак"},
+  {"id": "manicure-gel", "price": "65€", "it": "Manicure + gel (ritocco)", "ru": "Маникюр + гель (коррекция)"},
+  {"id": "manicure-uomo", "price": "30€", "it": "Manicure uomo", "ru": "Маникюр для него"},
+  {"id": "pedicure", "price": "55€", "it": "Pedicure (dita + pianta)", "ru": "Педикюр (пальцы + стопа)"},
+  {"id": "pedicure-classico", "price": "60€", "it": "Pedicure + smalto classico", "ru": "Педикюр + обычный лак"},
+  {"id": "pedicure-semi", "price": "65€", "it": "Pedicure + semipermanente", "ru": "Педикюр + гель-лак"},
+  {"id": "pedicure-uomo", "price": "60€", "it": "Pedicure uomo", "ru": "Педикюр для него"},
+  {"id": "pod-ricostruzione", "price": "10€", "it": "Ricostruzione ungueale (1 unghia)", "ru": "Реконструкция ногтя (1 ноготь)"},
+  {"id": "pod-trattamento", "price": "5–25€", "it": "Trattamento ungueale", "ru": "Лечение ногтя"},
+  {"id": "pod-callo", "price": "5–10€", "it": "Rimozione callo nucleato", "ru": "Удаление нуклеарной мозоли"},
+  {"id": "pod-fibra", "price": "40€", "it": "Fibra ritentiva", "ru": "Удерживающее волокно"},
+  {"id": "pod-consulenza", "price": "15€", "it": "Consulenza (senza trattamento)", "ru": "Консультация (без процедуры)"},
+  {"id": "corso", "price": "", "it": "Corso manicure", "ru": "Курс маникюра"}
+]

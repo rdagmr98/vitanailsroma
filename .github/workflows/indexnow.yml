@@ -1,0 +1,13 @@
+name: indexnow
+on:
+  push:
+    branches: [main]
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - run: |
+          curl -sS -X POST "https://api.indexnow.org/indexnow" \
+            -H "Content-Type: application/json" \
+            -d '{"host":"rdagmr98.github.io","key":"4cfed9fc6e986d19c07d929d376b7c4c","keyLocation":"https://rdagmr98.github.io/vitanailsroma/4cfed9fc6e986d19c07d929d376b7c4c.txt","urlList":["https://rdagmr98.github.io/vitanailsroma/","https://rdagmr98.github.io/vitanailsroma/prenota.html","https://rdagmr98.github.io/vitanailsroma/manicure-roma.html","https://rdagmr98.github.io/vitanailsroma/unghie-roma.html","https://rdagmr98.github.io/vitanailsroma/nails-roma.html","https://rdagmr98.github.io/vitanailsroma/manicure-russa-roma.html"]}'

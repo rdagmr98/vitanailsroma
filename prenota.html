@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prenota — Vita Nails Roma</title>
+  <link rel="canonical" href="https://rdagmr98.github.io/vitanailsroma/prenota.html">
+  <meta name="description" content="Prenota manicure, pedicure o podologia da Vita Nails Roma. Scegli uno slot libero e ricevi conferma.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/booking.css">
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <a class="logo" href="index.html">Vita <span>Nails</span></a>
+      <div>
+        <button type="button" class="lang-btn active" data-lang="it">IT</button>
+        <button type="button" class="lang-btn" data-lang="ru">RU</button>
+      </div>
+    </div>
+    <h1 id="tTitle">Prenota uno slot</h1>
+    <p class="sub" id="tSub">Primo a richiedere tiene lo slot (in attesa). Vita accetta o rifiuta. Se rifiuta, lo slot si libera. Instagram Direct resta disponibile.</p>
+    <p><a href="index.html#contatti" id="tIg">Oppure scrivi su Instagram</a></p>
+
+    <div class="card">
+      <label for="service" id="lService">Trattamento</label>
+      <select id="service"></select>
+      <label id="lSlots">Orari liberi</label>
+      <div class="slots" id="slots"></div>
+      <label for="name" id="lName">Nome</label>
+      <input id="name" maxlength="80" autocomplete="name">
+      <label for="note" id="lNote">Nota (opzionale)</label>
+      <input id="note" maxlength="200">
+      <div class="row">
+        <button type="button" class="btn btn-primary" id="bookBtn">Richiedi prenotazione</button>
+      </div>
+      <p class="err" id="err" hidden></p>
+      <p class="ok" id="ok" hidden></p>
+    </div>
+
+    <div class="card">
+      <label for="lookup" id="lLookup">Hai già un codice?</label>
+      <input id="lookup" placeholder="VN-XXXXXX">
+      <div class="row">
+        <button type="button" class="btn btn-outline" id="lookupBtn">Controlla stato</button>
+      </div>
+      <p id="lookupOut"></p>
+    </div>
+  </div>
+  <script src="js/dispatch-token.js"></script>
+  <script src="js/booking.js"></script>
+  <script>
+    const I18N = {
+      it: {
+        title: "Prenota uno slot",
+        sub: "Il primo a richiedere tiene lo slot. Vita conferma o rifiuta. Se rifiuta, lo slot si libera.",
+        ig: "Oppure scrivi su Instagram",
+        service: "Trattamento", slots: "Orari liberi", name: "Nome", note: "Nota (opzionale)",
+        book: "Richiedi prenotazione", lookup: "Hai già un codice?", check: "Controlla stato",
+        taken: "occupato", free: "libero",
+        errToken: "Prenotazione online non ancora attiva. Usa Instagram Direct.",
+        errTaken: "Slot appena occupato, scegline un altro.",
+        err: "Richiesta non inviata. Riprova o usa Instagram.",
+        wait: "Invio in corso (1–2 minuti)...",
+        done: (c) => `Richiesta inviata. Conserva il codice ${c} — stato: in attesa di Vita.`,
+        noSlot: "Scegli data/ora e scrivi il nome.",
+        notfound: "Codice non trovato (attendi un minuto se l'hai appena inviato).",
+        st: { pending: "in attesa", confirmed: "confermata", declined: "rifiutata", expired: "scaduta" }
+      },
+      ru: {
+        title: "Запись на слот",
+        sub: "Первый запрос держит слот. Вита подтверждает или отклоняет. Если отклоняет — слот снова свободен.",
+        ig: "Или напишите в Instagram",
+        service: "Процедура", slots: "Свободное время", name: "Имя", note: "Заметка (необязательно)",
+        book: "Отправить заявку", lookup: "Уже есть код?", check: "Проверить статус",
+        taken: "занято", free: "свободно",
+        errToken: "Онлайн-запись ещё не активна. Напишите в Instagram Direct.",
+        errTaken: "Слот только что заняли, выберите другой.",
+        err: "Не удалось отправить. Повторите или напишите в Instagram.",
+        wait: "Отправка (1–2 минуты)...",
+        done: (c) => `Заявка отправлена. Сохраните код ${c} — статус: ожидание Виты.`,
+        noSlot: "Выберите время и укажите имя.",
+        notfound: "Код не найден (подождите минуту, если только что отправили).",
+        st: { pending: "ожидание", confirmed: "подтверждено", declined: "отклонено", expired: "истекло" }
+      }
+    };
+    let lang = localStorage.getItem("vn-lang") || "it";
+    let t = I18N[lang];
+    let sel = "";
+    let services = [];
+
+    function apply() {
+      t = I18N[lang];
+      document.documentElement.lang = lang;
+      tTitle.textContent = t.title; tSub.textContent = t.sub; tIg.textContent = t.ig;
+      lService.textContent = t.service; lSlots.textContent = t.slots; lName.textContent = t.name;
+      lNote.textContent = t.note; lLookup.textContent = t.lookup;
+      bookBtn.textContent = t.book; lookupBtn.textContent = t.check;
+      document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
+      service.innerHTML = services.map(s => `<option value="${s.id}">${s[lang]} ${s.price}</option>`).join("");
+    }
+    document.querySelectorAll(".lang-btn").forEach(b => b.addEventListener("click", () => {
+      lang = b.dataset.lang; localStorage.setItem("vn-lang", lang); apply();
+    }));
+
+    function fmt(d) {
+      return d.toLocaleString(lang === "ru" ? "ru-RU" : "it-IT", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    async function renderSlots() {
+      const [cfg, data] = await Promise.all([VitaBook.loadJson("slots.json"), VitaBook.loadJson("bookings.json")]);
+      const list = VitaBook.expandSlots(cfg, data.bookings);
+      slots.innerHTML = list.map(s =>
+        `<button type="button" class="slot${s.id === sel ? " sel" : ""}" data-id="${s.id}" ${s.taken ? "disabled" : ""}>
+          <span>${fmt(s.t)}</span><span>${s.taken ? t.taken : t.free}</span>
+        </button>`
+      ).join("") || "<p>—</p>";
+      slots.querySelectorAll(".slot").forEach(btn => btn.addEventListener("click", () => {
+        sel = btn.dataset.id;
+        slots.querySelectorAll(".slot").forEach(x => x.classList.toggle("sel", x === btn));
+      }));
+    }
+
+    function newCode() {
+      return "VN-" + [...crypto.getRandomValues(new Uint8Array(3))].map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+
+    bookBtn.addEventListener("click", async () => {
+      err.hidden = ok.hidden = true;
+      const name = document.getElementById("name").value.trim();
+      if (!sel || !name) { err.hidden = false; err.textContent = t.noSlot; return; }
+      if (!window.VITA_DISPATCH_TOKEN) { err.hidden = false; err.textContent = t.errToken; return; }
+      const code = newCode();
+      ok.hidden = false; ok.textContent = t.wait;
+      try {
+        await VitaBook.dispatch("book", { name, slotId: sel, serviceId: service.value, note: note.value.trim(), code });
+        const b = await VitaBook.pollCode(code);
+        if (!b) { err.hidden = false; err.textContent = t.err; ok.hidden = true; return; }
+        if (b.status === "pending") ok.textContent = t.done(code);
+        else { err.hidden = false; err.textContent = t.errTaken; ok.hidden = true; }
+        await renderSlots();
+      } catch (e) {
+        err.hidden = false;
+        err.textContent = e.message === "notoken" ? t.errToken : t.err;
+        ok.hidden = true;
+      }
+    });
+
+    lookupBtn.addEventListener("click", async () => {
+      const code = lookup.value.trim().toUpperCase();
+      const data = await VitaBook.loadJson("bookings.json");
+      const b = data.bookings.find(x => x.code === code);
+      lookupOut.textContent = b ? `${b.code} · ${b.slotId} · ${t.st[b.status] || b.status}` : t.notfound;
+      lookupOut.className = b ? "status " + b.status : "err";
+    });
+
+    (async () => {
+      services = await VitaBook.loadJson("services.json");
+      apply();
+      await renderSlots();
+    })();
+  </script>
+</body>
+</html>
