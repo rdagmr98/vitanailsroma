@@ -26,8 +26,8 @@
     </div>
     <div id="app" hidden>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.4rem;">Agenda</h2>
-        <p class="sub" style="margin-bottom:0">Giallo = in attesa · Verde = confermato. Accetta / rifiuta dalle card.</p>
+        <h2>Agenda</h2>
+        <p class="sub" style="margin-bottom:0">Giallo = in attesa · Verde = confermato · Grigio = blocco.</p>
         <div class="cal-nav">
           <button type="button" class="btn btn-outline" id="agendaPrev">←</button>
           <strong id="agendaLabel"></strong>
@@ -36,8 +36,8 @@
         <div class="cal-week" id="agenda"></div>
       </div>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Inserisci appuntamento (voce / IG / altro)</h2>
-        <p class="sub" style="margin-bottom:0.6rem">Confermato subito. Il pubblico vede solo “occupato”, non il nome.</p>
+        <h2>Inserisci appuntamento (voce / IG)</h2>
+        <p class="sub" style="margin-bottom:0.6rem">Confermato subito. Il pubblico vede solo “occupato”.</p>
         <label>Trattamento</label>
         <select id="manService"></select>
         <label>Slot libero</label>
@@ -49,17 +49,44 @@
         <div class="cal-week" id="manSlots"></div>
         <label>Nome cliente</label>
         <input id="manName" maxlength="80">
-        <label>Nota / canale (es. voce, Instagram)</label>
+        <label>Nota / canale</label>
         <input id="manNote" maxlength="200" placeholder="voce">
         <div class="row"><button type="button" class="btn btn-gold" id="manBook">Salva confermato</button></div>
       </div>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Orari studio (JSON)</h2>
-        <textarea id="slotsJson" rows="8"></textarea>
-        <div class="row"><button type="button" class="btn btn-outline" id="saveSlots">Salva orari</button></div>
+        <h2>Non disponibile (blocchi)</h2>
+        <p class="sub" style="margin-bottom:0.6rem">Ferie o pause: nessuno prenota in questi intervalli.</p>
+        <div class="grid2">
+          <div><label>Inizio</label><input id="blockStart" type="datetime-local"></div>
+          <div><label>Fine</label><input id="blockEnd" type="datetime-local"></div>
+        </div>
+        <label>Nota</label>
+        <input id="blockNote" maxlength="80" placeholder="ferie / non disponibile">
+        <div class="row"><button type="button" class="btn btn-outline" id="addBlock">Aggiungi blocco</button></div>
+        <div id="blockList" style="margin-top:0.8rem"></div>
       </div>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Cambia password</h2>
+        <h2>Listino · durata (minuti)</h2>
+        <p class="sub" style="margin-bottom:0.4rem">Nome · prezzo · durata. La durata genera gli slot liberi.</p>
+        <div id="svcEditor"></div>
+        <div class="row"><button type="button" class="btn btn-outline" id="saveSvc">Salva listino</button></div>
+      </div>
+      <div class="card">
+        <h2>Orario studio</h2>
+        <div class="grid2">
+          <div><label>Apertura</label><input id="hOpen" type="time"></div>
+          <div><label>Chiusura</label><input id="hClose" type="time"></div>
+          <div><label>Settimane avanti</label><input id="hWeeks" type="number" min="1" max="12"></div>
+          <div><label>Passo slot (min)</label><input id="hStep" type="number" min="5" max="120"></div>
+        </div>
+        <label>Giorni (0=dom … 6=sab)</label>
+        <input id="hDays" placeholder="2,3,4,5,6">
+        <label>Scadenza pending (ore)</label>
+        <input id="hPending" type="number" min="1" max="168">
+        <div class="row"><button type="button" class="btn btn-outline" id="saveHours">Salva orario</button></div>
+      </div>
+      <div class="card">
+        <h2>Cambia password</h2>
         <label>Nuova password</label>
         <input id="newPw" type="password">
         <div class="row"><button type="button" class="btn btn-outline" id="savePw">Aggiorna password</button></div>
@@ -81,6 +108,7 @@
     let lastHours = null;
     let lastIntervals = [];
     let lastBookings = [];
+    let lastBlocks = [];
 
     function show(okTxt, errTxt) {
       msg.hidden = !okTxt; err.hidden = !errTxt;
@@ -99,6 +127,10 @@
       const { mon, sun } = weekRange(offset);
       const opts = { day: "numeric", month: "short" };
       return `${mon.toLocaleDateString("it-IT", opts)} – ${sun.toLocaleDateString("it-IT", opts)}`;
+    }
+
+    function fromLocalInput(v) {
+      return v && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(v) ? v.slice(0, 16) : "";
     }
 
     function intervalsFromAv(av) {
@@ -121,14 +153,31 @@
       for (const b of lastBookings) {
         if (b.status !== "pending" && b.status !== "confirmed") continue;
         const day = b.slotId.slice(0, 10);
-        (byDay[day] || (byDay[day] = [])).push(b);
+        (byDay[day] || (byDay[day] = [])).push({ kind: "appt", b });
+      }
+      for (const bl of lastBlocks) {
+        const s = VitaBook.parseSlotId(bl.start);
+        const e = VitaBook.parseSlotId(bl.end);
+        if (!s || !e) continue;
+        for (let t = new Date(s.getFullYear(), s.getMonth(), s.getDate()); t < e; t.setDate(t.getDate() + 1)) {
+          const key = VitaBook.ymd(t);
+          (byDay[key] || (byDay[key] = [])).push({ kind: "block", bl });
+        }
       }
       const cells = [];
       for (let i = 0; i < 7; i++) {
         const d = new Date(mon); d.setDate(mon.getDate() + i);
         const key = VitaBook.ymd(d);
-        const list = (byDay[key] || []).sort((a, b) => a.slotId.localeCompare(b.slotId));
-        const appts = list.map(b => {
+        const list = (byDay[key] || []).sort((a, c) =>
+          (a.b ? a.b.slotId : a.bl.start).localeCompare(c.b ? c.b.slotId : c.bl.start));
+        const appts = list.map(it => {
+          if (it.kind === "block") {
+            return `<div class="cal-appt block">
+              <strong>Blocco</strong>
+              <div class="meta">${it.bl.start.slice(11)}–${it.bl.end.slice(11)}${it.bl.note ? " · " + it.bl.note : ""}</div>
+            </div>`;
+          }
+          const b = it.b;
           const time = b.slotId.slice(11);
           const svc = svcMap[b.serviceId] || b.serviceId;
           const dur = b.duration ? ` · ${b.duration}′` : "";
@@ -175,7 +224,7 @@
         const key = VitaBook.ymd(d);
         const daySlots = (byDay[key] || []).filter(s => !s.taken);
         const btns = daySlots.map(s =>
-          `<button type="button" class="cal-slot${s.id === sel ? " sel" : ""}" data-id="${s.id}">${VitaBook.hhmm(s.t)}</button>`
+          `<button type="button" class="cal-slot free${s.id === sel ? " sel" : ""}" data-id="${s.id}">${VitaBook.hhmm(s.t)}</button>`
         ).join("");
         cells.push(`<div class="cal-day${daySlots.length ? "" : " muted"}${key === today ? " today" : ""}">
           <div class="cal-day-h">${d.toLocaleDateString("it-IT", { weekday: "short" })}<strong>${d.getDate()}/${d.getMonth() + 1}</strong></div>
@@ -189,24 +238,62 @@
       }));
     }
 
+    function renderBlocks() {
+      blockList.innerHTML = lastBlocks.map(bl =>
+        `<div class="pending-item">
+          <div><strong>${bl.note || "Blocco"}</strong><br><small>${bl.start} → ${bl.end}</small></div>
+          <button type="button" class="btn btn-danger" data-del="${bl.id}">Rimuovi</button>
+        </div>`
+      ).join("") || "<p>Nessun blocco.</p>";
+      blockList.querySelectorAll("[data-del]").forEach(btn => btn.addEventListener("click", async () => {
+        const next = lastBlocks.filter(b => b.id !== btn.dataset.del);
+        try {
+          await VitaBook.api("update_blocks", { adminId: cred.id, password: cred.pw, blocks: next });
+          show("Blocco rimosso.", "");
+          await refresh();
+        } catch { show("", "Invio fallito."); }
+      }));
+    }
+
+    function renderServices() {
+      svcEditor.innerHTML = services.map((s, i) =>
+        `<div class="svc-row">
+          <input data-i="${i}" data-f="it" value="${String(s.it).replace(/"/g, "&quot;")}">
+          <input data-i="${i}" data-f="price" value="${String(s.price || "").replace(/"/g, "&quot;")}" placeholder="€">
+          <input data-i="${i}" data-f="duration" type="number" min="5" max="480" value="${s.duration || 60}">
+        </div>`
+      ).join("");
+    }
+
     async function refresh() {
-      const [data, svc, hours, av] = await Promise.all([
+      const [data, svc, hours, av, blocksRoot] = await Promise.all([
         VitaBook.loadJson("bookings.json"),
         VitaBook.loadJson("services.json"),
         VitaBook.loadJson("slots.json"),
         VitaBook.loadJson("availability.json"),
+        VitaBook.loadJson("blocks.json").catch(() => ({ blocks: [] })),
       ]);
       services = svc;
       services.forEach(s => { svcMap[s.id] = s.it; });
       manService.innerHTML = services.map(s =>
         `<option value="${s.id}">${s.it} ${s.price}${s.duration ? " · " + s.duration + "′" : ""}</option>`
       ).join("");
-      slotsJson.value = JSON.stringify(hours, null, 2);
       lastBookings = data.bookings || [];
       lastHours = hours;
+      lastBlocks = (blocksRoot && blocksRoot.blocks) || [];
       lastIntervals = intervalsFromAv(av);
+
+      hOpen.value = hours.open || "10:00";
+      hClose.value = hours.close || "18:00";
+      hWeeks.value = hours.weeksAhead || 4;
+      hStep.value = hours.stepMinutes || 30;
+      hDays.value = (hours.weekdays || []).join(",");
+      hPending.value = hours.pendingHours || 48;
+
       renderAgenda();
       renderManSlots();
+      renderBlocks();
+      renderServices();
     }
 
     async function decide(op, code) {
@@ -258,15 +345,54 @@
       }
     });
 
-    saveSlots.addEventListener("click", async () => {
+    addBlock.addEventListener("click", async () => {
+      const start = fromLocalInput(blockStart.value);
+      const end = fromLocalInput(blockEnd.value);
+      if (!start || !end) { show("", "Inizio e fine obbligatori."); return; }
+      const next = [...lastBlocks, {
+        id: "B-" + Date.now().toString(36),
+        start, end, note: blockNote.value.trim(),
+      }];
       try {
-        const hours = JSON.parse(slotsJson.value);
-        await VitaBook.api("update_hours", { adminId: cred.id, password: cred.pw, hours });
-        show("Orari salvati.", "");
+        await VitaBook.api("update_blocks", { adminId: cred.id, password: cred.pw, blocks: next });
+        blockStart.value = blockEnd.value = blockNote.value = "";
+        show("Blocco salvato.", "");
         await refresh();
-      } catch {
-        show("", "JSON non valido o invio fallito.");
-      }
+      } catch { show("", "Invio fallito."); }
+    });
+
+    saveSvc.addEventListener("click", async () => {
+      const next = services.map((s, i) => ({
+        ...s,
+        it: svcEditor.querySelector(`[data-i="${i}"][data-f="it"]`).value.trim(),
+        price: svcEditor.querySelector(`[data-i="${i}"][data-f="price"]`).value.trim(),
+        duration: parseInt(svcEditor.querySelector(`[data-i="${i}"][data-f="duration"]`).value, 10),
+        ru: s.ru || s.it,
+      }));
+      try {
+        await VitaBook.api("update_services", { adminId: cred.id, password: cred.pw, services: next });
+        show("Listino salvato.", "");
+        await refresh();
+      } catch { show("", "Invio fallito (durate 5–480)."); }
+    });
+
+    saveHours.addEventListener("click", async () => {
+      const days = hDays.value.split(",").map(x => parseInt(x.trim(), 10)).filter(n => !isNaN(n));
+      try {
+        await VitaBook.api("update_hours", {
+          adminId: cred.id, password: cred.pw,
+          hours: {
+            weekdays: days,
+            open: hOpen.value,
+            close: hClose.value,
+            weeksAhead: parseInt(hWeeks.value, 10),
+            stepMinutes: parseInt(hStep.value, 10),
+            pendingHours: parseInt(hPending.value, 10),
+          },
+        });
+        show("Orario salvato.", "");
+        await refresh();
+      } catch { show("", "Orario non valido."); }
     });
 
     savePw.addEventListener("click", async () => {
@@ -274,9 +400,7 @@
         await VitaBook.api("change_password", { adminId: cred.id, password: cred.pw, newPassword: newPw.value });
         cred.pw = newPw.value;
         show("Password aggiornata.", "");
-      } catch {
-        show("", "Invio fallito.");
-      }
+      } catch { show("", "Invio fallito."); }
     });
   </script>
 </body>
