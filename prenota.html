@@ -27,7 +27,12 @@
       <label for="service" id="lService">Trattamento</label>
       <select id="service"></select>
       <label id="lSlots">Orari</label>
-      <div class="slots" id="slots"></div>
+      <div class="cal-nav">
+        <button type="button" class="btn btn-outline" id="weekPrev">←</button>
+        <strong id="weekLabel"></strong>
+        <button type="button" class="btn btn-outline" id="weekNext">→</button>
+      </div>
+      <div class="cal-week" id="slots"></div>
       <label for="name" id="lName">Nome</label>
       <input id="name" maxlength="80" autocomplete="name">
       <label for="note" id="lNote">Nota (opzionale)</label>
@@ -55,7 +60,7 @@
     const I18N = {
       it: {
         title: "Prenota uno slot",
-        sub: "Vedi solo libero/occupato. La prima richiesta tiene lo slot; Vita conferma o rifiuta.",
+        sub: "Calendario settimane → giorni → orari. Libero/occupato visibile; Vita conferma o rifiuta.",
         ig: "Oppure scrivi su Instagram",
         service: "Trattamento", slots: "Orari", name: "Nome", note: "Nota (opzionale)",
         book: "Richiedi prenotazione", lookup: "Hai già un codice?", check: "Controlla stato",
@@ -71,7 +76,7 @@
       },
       ru: {
         title: "Запись на слот",
-        sub: "Видно только свободно/занято. Первый запрос держит слот; Вита подтверждает или отклоняет.",
+        sub: "Календарь: недели → дни → время. Свободно/занято видно; Вита подтверждает или отклоняет.",
         ig: "Или напишите в Instagram",
         service: "Процедура", slots: "Время", name: "Имя", note: "Заметка (необязательно)",
         book: "Отправить заявку", lookup: "Уже есть код?", check: "Проверить статус",
@@ -89,7 +94,12 @@
     let lang = localStorage.getItem("vn-lang") || "it";
     let t = I18N[lang];
     let sel = "";
+    let weekOff = 0;
     let services = [];
+    let hoursCfg = null;
+    let intervals = [];
+
+    function loc() { return lang === "ru" ? "ru-RU" : "it-IT"; }
 
     function apply() {
       t = I18N[lang];
@@ -99,29 +109,66 @@
       lNote.textContent = t.note; lLookup.textContent = t.lookup;
       bookBtn.textContent = t.book; lookupBtn.textContent = t.check;
       document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === lang));
-      service.innerHTML = services.map(s => `<option value="${s.id}">${s[lang]} ${s.price}</option>`).join("");
+      service.innerHTML = services.map(s =>
+        `<option value="${s.id}">${s[lang]} ${s.price}${s.duration ? " · " + s.duration + "′" : ""}</option>`
+      ).join("");
+      paintWeek();
     }
     document.querySelectorAll(".lang-btn").forEach(b => b.addEventListener("click", () => {
       lang = b.dataset.lang; localStorage.setItem("vn-lang", lang); apply();
     }));
 
-    function fmt(d) {
-      return d.toLocaleString(lang === "ru" ? "ru-RU" : "it-IT", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    function paintWeek() {
+      if (!hoursCfg) return;
+      const mon = VitaBook.mondayOf(new Date());
+      mon.setDate(mon.getDate() + weekOff * 7);
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      const opts = { day: "numeric", month: "short" };
+      weekLabel.textContent = `${mon.toLocaleDateString(loc(), opts)} – ${sun.toLocaleDateString(loc(), opts)}`;
+      const today = VitaBook.ymd(new Date());
+      const dur = VitaBook.serviceDuration(services, service.value);
+      const list = VitaBook.expandSlots(hoursCfg, dur, intervals);
+      const byDay = {};
+      for (const s of list) {
+        const key = VitaBook.ymd(s.t);
+        (byDay[key] || (byDay[key] = [])).push(s);
+      }
+      const cells = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(mon); d.setDate(mon.getDate() + i);
+        const key = VitaBook.ymd(d);
+        const daySlots = byDay[key] || [];
+        const btns = daySlots.map(s =>
+          `<button type="button" class="cal-slot${s.id === sel ? " sel" : ""}" data-id="${s.id}" ${s.taken ? "disabled" : ""} title="${s.taken ? t.taken : t.free}">${VitaBook.hhmm(s.t)}</button>`
+        ).join("");
+        cells.push(`<div class="cal-day${daySlots.length ? "" : " muted"}${key === today ? " today" : ""}">
+          <div class="cal-day-h">${d.toLocaleDateString(loc(), { weekday: "short" })}<strong>${d.getDate()}/${d.getMonth() + 1}</strong></div>
+          ${btns || ""}
+        </div>`);
+      }
+      slots.innerHTML = cells.join("");
+      slots.querySelectorAll(".cal-slot:not(:disabled)").forEach(btn => btn.addEventListener("click", () => {
+        sel = btn.dataset.id;
+        slots.querySelectorAll(".cal-slot").forEach(x => x.classList.toggle("sel", x === btn));
+      }));
     }
 
     async function renderSlots() {
       const [cfg, av] = await Promise.all([VitaBook.loadJson("slots.json"), VitaBook.loadJson("availability.json")]);
-      const list = VitaBook.expandSlots(cfg, av.occupied);
-      slots.innerHTML = list.map(s =>
-        `<button type="button" class="slot${s.id === sel ? " sel" : ""}" data-id="${s.id}" ${s.taken ? "disabled" : ""}>
-          <span>${fmt(s.t)}</span><span>${s.taken ? t.taken : t.free}</span>
-        </button>`
-      ).join("") || "<p>—</p>";
-      slots.querySelectorAll(".slot").forEach(btn => btn.addEventListener("click", () => {
-        sel = btn.dataset.id;
-        slots.querySelectorAll(".slot").forEach(x => x.classList.toggle("sel", x === btn));
-      }));
+      hoursCfg = cfg;
+      intervals = [...(av.busy || []), ...(av.blocks || [])];
+      if ((!av.busy || !av.busy.length) && av.occupied && av.occupied.length) {
+        intervals = av.occupied.map(id => {
+          const t = VitaBook.parseSlotId(id);
+          return t ? { start: id, end: VitaBook.slotIdOf(VitaBook.addMins(t, 60)) } : null;
+        }).filter(Boolean);
+      }
+      paintWeek();
     }
+
+    weekPrev.addEventListener("click", () => { weekOff = Math.max(0, weekOff - 1); paintWeek(); });
+    weekNext.addEventListener("click", () => { weekOff++; paintWeek(); });
+    service.addEventListener("change", () => { sel = ""; paintWeek(); });
 
     function newCode() {
       return "VN-" + [...crypto.getRandomValues(new Uint8Array(3))].map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();

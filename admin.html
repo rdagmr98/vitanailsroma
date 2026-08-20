@@ -26,20 +26,27 @@
     </div>
     <div id="app" hidden>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">In attesa (online)</h2>
-        <div id="pending"></div>
-      </div>
-      <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Agenda (nomi e dettagli)</h2>
-        <div id="agenda"></div>
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.4rem;">Agenda</h2>
+        <p class="sub" style="margin-bottom:0">Giallo = in attesa · Verde = confermato. Accetta / rifiuta dalle card.</p>
+        <div class="cal-nav">
+          <button type="button" class="btn btn-outline" id="agendaPrev">←</button>
+          <strong id="agendaLabel"></strong>
+          <button type="button" class="btn btn-outline" id="agendaNext">→</button>
+        </div>
+        <div class="cal-week" id="agenda"></div>
       </div>
       <div class="card">
         <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Inserisci appuntamento (voce / IG / altro)</h2>
-        <p class="sub" style="margin-bottom:0.6rem">Confermato subito: tiene lo slot come occupato. Il pubblico vede solo “occupato”, non il nome.</p>
+        <p class="sub" style="margin-bottom:0.6rem">Confermato subito. Il pubblico vede solo “occupato”, non il nome.</p>
         <label>Trattamento</label>
         <select id="manService"></select>
         <label>Slot libero</label>
-        <div class="slots" id="manSlots"></div>
+        <div class="cal-nav">
+          <button type="button" class="btn btn-outline" id="manPrev">←</button>
+          <strong id="manLabel"></strong>
+          <button type="button" class="btn btn-outline" id="manNext">→</button>
+        </div>
+        <div class="cal-week" id="manSlots"></div>
         <label>Nome cliente</label>
         <input id="manName" maxlength="80">
         <label>Nota / canale (es. voce, Instagram)</label>
@@ -47,13 +54,13 @@
         <div class="row"><button type="button" class="btn btn-gold" id="manBook">Salva confermato</button></div>
       </div>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Orari (JSON)</h2>
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Orari studio (JSON)</h2>
         <textarea id="slotsJson" rows="8"></textarea>
         <div class="row"><button type="button" class="btn btn-outline" id="saveSlots">Salva orari</button></div>
       </div>
       <div class="card">
         <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Cambia password</h2>
-        <label>Nuova password (min. 10)</label>
+        <label>Nuova password</label>
         <input id="newPw" type="password">
         <div class="row"><button type="button" class="btn btn-outline" id="savePw">Aggiorna password</button></div>
       </div>
@@ -67,8 +74,13 @@
   <script>
     let cred = null;
     let sel = "";
+    let agendaWeek = 0;
+    let manWeek = 0;
     const svcMap = {};
     let services = [];
+    let lastHours = null;
+    let lastIntervals = [];
+    let lastBookings = [];
 
     function show(okTxt, errTxt) {
       msg.hidden = !okTxt; err.hidden = !errTxt;
@@ -76,8 +88,24 @@
       if (errTxt) err.textContent = errTxt;
     }
 
-    function fmt(d) {
-      return d.toLocaleString("it-IT", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    function weekRange(offset) {
+      const mon = VitaBook.mondayOf(new Date());
+      mon.setDate(mon.getDate() + offset * 7);
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      return { mon, sun };
+    }
+
+    function weekLabel(offset) {
+      const { mon, sun } = weekRange(offset);
+      const opts = { day: "numeric", month: "short" };
+      return `${mon.toLocaleDateString("it-IT", opts)} – ${sun.toLocaleDateString("it-IT", opts)}`;
+    }
+
+    function intervalsFromAv(av) {
+      return [...(av.busy || []), ...(av.blocks || []), ...(av.occupied || []).map(id => {
+        const t = VitaBook.parseSlotId(id);
+        return t ? { start: id, end: VitaBook.slotIdOf(VitaBook.addMins(t, 60)) } : null;
+      }).filter(Boolean)];
     }
 
     async function authOk(id, pw) {
@@ -85,8 +113,84 @@
       return id === admin.id && pw === admin.password;
     }
 
+    function renderAgenda() {
+      const { mon } = weekRange(agendaWeek);
+      agendaLabel.textContent = weekLabel(agendaWeek);
+      const today = VitaBook.ymd(new Date());
+      const byDay = {};
+      for (const b of lastBookings) {
+        if (b.status !== "pending" && b.status !== "confirmed") continue;
+        const day = b.slotId.slice(0, 10);
+        (byDay[day] || (byDay[day] = [])).push(b);
+      }
+      const cells = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(mon); d.setDate(mon.getDate() + i);
+        const key = VitaBook.ymd(d);
+        const list = (byDay[key] || []).sort((a, b) => a.slotId.localeCompare(b.slotId));
+        const appts = list.map(b => {
+          const time = b.slotId.slice(11);
+          const svc = svcMap[b.serviceId] || b.serviceId;
+          const dur = b.duration ? ` · ${b.duration}′` : "";
+          const acts = b.status === "pending"
+            ? `<div class="row">
+                <button type="button" class="btn btn-gold" data-op="accept" data-code="${b.code}">Accetta</button>
+                <button type="button" class="btn btn-danger" data-op="decline" data-code="${b.code}">Rifiuta</button>
+              </div>`
+            : `<div class="row">
+                <button type="button" class="btn btn-danger" data-op="cancel" data-code="${b.code}">Annulla</button>
+              </div>`;
+          return `<div class="cal-appt ${b.status}">
+            <strong>${b.name}</strong>
+            <div class="meta">${time}${dur} · ${svc}${b.note ? " · " + b.note : ""}${b.source ? " · " + b.source : ""}</div>
+            <div class="meta"><code>${b.code}</code> · ${b.status === "pending" ? "in attesa" : "confermato"}</div>
+            ${acts}
+          </div>`;
+        }).join("");
+        cells.push(`<div class="cal-day${list.length ? "" : " muted"}${key === today ? " today" : ""}">
+          <div class="cal-day-h">${d.toLocaleDateString("it-IT", { weekday: "short" })}<strong>${d.getDate()}/${d.getMonth() + 1}</strong></div>
+          ${appts || ""}
+        </div>`);
+      }
+      agenda.innerHTML = cells.join("");
+      agenda.querySelectorAll("[data-op]").forEach(btn =>
+        btn.addEventListener("click", () => decide(btn.dataset.op, btn.dataset.code)));
+    }
+
+    function renderManSlots() {
+      if (!lastHours) return;
+      const { mon } = weekRange(manWeek);
+      manLabel.textContent = weekLabel(manWeek);
+      const today = VitaBook.ymd(new Date());
+      const dur = VitaBook.serviceDuration(services, manService.value);
+      const list = VitaBook.expandSlots(lastHours, dur, lastIntervals);
+      const byDay = {};
+      for (const s of list) {
+        const key = VitaBook.ymd(s.t);
+        (byDay[key] || (byDay[key] = [])).push(s);
+      }
+      const cells = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(mon); d.setDate(mon.getDate() + i);
+        const key = VitaBook.ymd(d);
+        const daySlots = (byDay[key] || []).filter(s => !s.taken);
+        const btns = daySlots.map(s =>
+          `<button type="button" class="cal-slot${s.id === sel ? " sel" : ""}" data-id="${s.id}">${VitaBook.hhmm(s.t)}</button>`
+        ).join("");
+        cells.push(`<div class="cal-day${daySlots.length ? "" : " muted"}${key === today ? " today" : ""}">
+          <div class="cal-day-h">${d.toLocaleDateString("it-IT", { weekday: "short" })}<strong>${d.getDate()}/${d.getMonth() + 1}</strong></div>
+          ${btns || ""}
+        </div>`);
+      }
+      manSlots.innerHTML = cells.join("");
+      manSlots.querySelectorAll(".cal-slot").forEach(btn => btn.addEventListener("click", () => {
+        sel = btn.dataset.id;
+        manSlots.querySelectorAll(".cal-slot").forEach(x => x.classList.toggle("sel", x === btn));
+      }));
+    }
+
     async function refresh() {
-      const [data, svc, slots, av] = await Promise.all([
+      const [data, svc, hours, av] = await Promise.all([
         VitaBook.loadJson("bookings.json"),
         VitaBook.loadJson("services.json"),
         VitaBook.loadJson("slots.json"),
@@ -94,48 +198,15 @@
       ]);
       services = svc;
       services.forEach(s => { svcMap[s.id] = s.it; });
-      manService.innerHTML = services.map(s => `<option value="${s.id}">${s.it} ${s.price}</option>`).join("");
-      slotsJson.value = JSON.stringify(slots, null, 2);
-
-      const pendingList = data.bookings.filter(b => b.status === "pending");
-      pending.innerHTML = pendingList.map(b =>
-        `<div class="pending-item">
-          <div><code>${b.code}</code> · <strong>${b.name}</strong><br>
-          <small>${b.slotId} · ${svcMap[b.serviceId] || b.serviceId}${b.note ? " · " + b.note : ""}</small></div>
-          <div class="row">
-            <button type="button" class="btn btn-gold" data-op="accept" data-code="${b.code}">Accetta</button>
-            <button type="button" class="btn btn-danger" data-op="decline" data-code="${b.code}">Rifiuta</button>
-          </div>
-        </div>`
-      ).join("") || "<p>Nessuna richiesta online.</p>";
-
-      const active = data.bookings
-        .filter(b => b.status === "pending" || b.status === "confirmed")
-        .sort((a, b) => a.slotId.localeCompare(b.slotId));
-      agenda.innerHTML = active.map(b =>
-        `<div class="pending-item">
-          <div><code>${b.code}</code> · <strong>${b.name}</strong> · ${b.status}
-          ${b.source ? " · " + b.source : ""}<br>
-          <small>${b.slotId} · ${svcMap[b.serviceId] || b.serviceId}${b.note ? " · " + b.note : ""}</small></div>
-          <div class="row">
-            <button type="button" class="btn btn-danger" data-op="cancel" data-code="${b.code}">Annulla</button>
-          </div>
-        </div>`
-      ).join("") || "<p>Nessun appuntamento.</p>";
-
-      document.querySelectorAll("[data-op]").forEach(btn =>
-        btn.addEventListener("click", () => decide(btn.dataset.op, btn.dataset.code)));
-
-      const free = VitaBook.expandSlots(slots, av.occupied).filter(s => !s.taken);
-      manSlots.innerHTML = free.map(s =>
-        `<button type="button" class="slot${s.id === sel ? " sel" : ""}" data-id="${s.id}">
-          <span>${fmt(s.t)}</span><span>libero</span>
-        </button>`
-      ).join("") || "<p>Nessuno slot libero.</p>";
-      manSlots.querySelectorAll(".slot").forEach(btn => btn.addEventListener("click", () => {
-        sel = btn.dataset.id;
-        manSlots.querySelectorAll(".slot").forEach(x => x.classList.toggle("sel", x === btn));
-      }));
+      manService.innerHTML = services.map(s =>
+        `<option value="${s.id}">${s.it} ${s.price}${s.duration ? " · " + s.duration + "′" : ""}</option>`
+      ).join("");
+      slotsJson.value = JSON.stringify(hours, null, 2);
+      lastBookings = data.bookings || [];
+      lastHours = hours;
+      lastIntervals = intervalsFromAv(av);
+      renderAgenda();
+      renderManSlots();
     }
 
     async function decide(op, code) {
@@ -148,6 +219,12 @@
         show("", e.message === "noapi" ? "API non configurata." : "Invio fallito.");
       }
     }
+
+    agendaPrev.addEventListener("click", () => { agendaWeek--; renderAgenda(); });
+    agendaNext.addEventListener("click", () => { agendaWeek++; renderAgenda(); });
+    manPrev.addEventListener("click", () => { manWeek--; renderManSlots(); });
+    manNext.addEventListener("click", () => { manWeek++; renderManSlots(); });
+    manService.addEventListener("change", () => { sel = ""; renderManSlots(); });
 
     loginBtn.addEventListener("click", async () => {
       loginErr.hidden = true;
@@ -183,20 +260,19 @@
 
     saveSlots.addEventListener("click", async () => {
       try {
-        const slots = JSON.parse(slotsJson.value);
-        await VitaBook.api("update_slots", { adminId: cred.id, password: cred.pw, slots });
+        const hours = JSON.parse(slotsJson.value);
+        await VitaBook.api("update_hours", { adminId: cred.id, password: cred.pw, hours });
         show("Orari salvati.", "");
+        await refresh();
       } catch {
         show("", "JSON non valido o invio fallito.");
       }
     });
 
     savePw.addEventListener("click", async () => {
-      const n = newPw.value;
-      if (n.length < 6) { show("", "Minimo 6 caratteri."); return; }
       try {
-        await VitaBook.api("change_password", { adminId: cred.id, password: cred.pw, newPassword: n });
-        cred.pw = n;
+        await VitaBook.api("change_password", { adminId: cred.id, password: cred.pw, newPassword: newPw.value });
+        cred.pw = newPw.value;
         show("Password aggiornata.", "");
       } catch {
         show("", "Invio fallito.");
