@@ -20,13 +20,13 @@
       </div>
     </div>
     <h1 id="tTitle">Prenota uno slot</h1>
-    <p class="sub" id="tSub">Primo a richiedere tiene lo slot (in attesa). Vita accetta o rifiuta. Se rifiuta, lo slot si libera. Instagram Direct resta disponibile.</p>
+    <p class="sub" id="tSub">Vedi solo se lo slot è libero o occupato. La prima richiesta tiene lo slot; Vita conferma o rifiuta.</p>
     <p><a href="index.html#contatti" id="tIg">Oppure scrivi su Instagram</a></p>
 
     <div class="card">
       <label for="service" id="lService">Trattamento</label>
       <select id="service"></select>
-      <label id="lSlots">Orari liberi</label>
+      <label id="lSlots">Orari</label>
       <div class="slots" id="slots"></div>
       <label for="name" id="lName">Nome</label>
       <input id="name" maxlength="80" autocomplete="name">
@@ -54,35 +54,35 @@
     const I18N = {
       it: {
         title: "Prenota uno slot",
-        sub: "Il primo a richiedere tiene lo slot. Vita conferma o rifiuta. Se rifiuta, lo slot si libera.",
+        sub: "Vedi solo libero/occupato. La prima richiesta tiene lo slot; Vita conferma o rifiuta.",
         ig: "Oppure scrivi su Instagram",
-        service: "Trattamento", slots: "Orari liberi", name: "Nome", note: "Nota (opzionale)",
+        service: "Trattamento", slots: "Orari", name: "Nome", note: "Nota (opzionale)",
         book: "Richiedi prenotazione", lookup: "Hai già un codice?", check: "Controlla stato",
         taken: "occupato", free: "libero",
-        errToken: "Prenotazione online non ancora attiva. Usa Instagram Direct.",
+        errToken: "Prenotazione online non attiva: manca il token GitHub (dispatch). Contatta chi gestisce il sito.",
         errTaken: "Slot appena occupato, scegline un altro.",
         err: "Richiesta non inviata. Riprova o usa Instagram.",
         wait: "Invio in corso (1–2 minuti)...",
-        done: (c) => `Richiesta inviata. Conserva il codice ${c} — stato: in attesa di Vita.`,
+        done: (c) => `Richiesta inviata. Conserva il codice ${c} — in attesa di Vita.`,
         noSlot: "Scegli data/ora e scrivi il nome.",
         notfound: "Codice non trovato (attendi un minuto se l'hai appena inviato).",
-        st: { pending: "in attesa", confirmed: "confermata", declined: "rifiutata", expired: "scaduta" }
+        st: { pending: "in attesa", confirmed: "confermata", declined: "rifiutata", expired: "scaduta", cancelled: "annullata" }
       },
       ru: {
         title: "Запись на слот",
-        sub: "Первый запрос держит слот. Вита подтверждает или отклоняет. Если отклоняет — слот снова свободен.",
+        sub: "Видно только свободно/занято. Первый запрос держит слот; Вита подтверждает или отклоняет.",
         ig: "Или напишите в Instagram",
-        service: "Процедура", slots: "Свободное время", name: "Имя", note: "Заметка (необязательно)",
+        service: "Процедура", slots: "Время", name: "Имя", note: "Заметка (необязательно)",
         book: "Отправить заявку", lookup: "Уже есть код?", check: "Проверить статус",
         taken: "занято", free: "свободно",
-        errToken: "Онлайн-запись ещё не активна. Напишите в Instagram Direct.",
+        errToken: "Онлайн-запись не активна (нет GitHub token). Напишите в Instagram.",
         errTaken: "Слот только что заняли, выберите другой.",
-        err: "Не удалось отправить. Повторите или напишите в Instagram.",
+        err: "Не удалось отправить. Повторите или Instagram.",
         wait: "Отправка (1–2 минуты)...",
-        done: (c) => `Заявка отправлена. Сохраните код ${c} — статус: ожидание Виты.`,
+        done: (c) => `Заявка отправлена. Код ${c} — ожидание Виты.`,
         noSlot: "Выберите время и укажите имя.",
-        notfound: "Код не найден (подождите минуту, если только что отправили).",
-        st: { pending: "ожидание", confirmed: "подтверждено", declined: "отклонено", expired: "истекло" }
+        notfound: "Код не найден.",
+        st: { pending: "ожидание", confirmed: "подтверждено", declined: "отклонено", expired: "истекло", cancelled: "отменено" }
       }
     };
     let lang = localStorage.getItem("vn-lang") || "it";
@@ -109,8 +109,8 @@
     }
 
     async function renderSlots() {
-      const [cfg, data] = await Promise.all([VitaBook.loadJson("slots.json"), VitaBook.loadJson("bookings.json")]);
-      const list = VitaBook.expandSlots(cfg, data.bookings);
+      const [cfg, av] = await Promise.all([VitaBook.loadJson("slots.json"), VitaBook.loadJson("availability.json")]);
+      const list = VitaBook.expandSlots(cfg, av.occupied);
       slots.innerHTML = list.map(s =>
         `<button type="button" class="slot${s.id === sel ? " sel" : ""}" data-id="${s.id}" ${s.taken ? "disabled" : ""}>
           <span>${fmt(s.t)}</span><span>${s.taken ? t.taken : t.free}</span>
@@ -149,9 +149,9 @@
 
     lookupBtn.addEventListener("click", async () => {
       const code = lookup.value.trim().toUpperCase();
-      const data = await VitaBook.loadJson("bookings.json");
-      const b = data.bookings.find(x => x.code === code);
-      lookupOut.textContent = b ? `${b.code} · ${b.slotId} · ${t.st[b.status] || b.status}` : t.notfound;
+      const av = await VitaBook.loadJson("availability.json");
+      const b = av.codes && av.codes[code];
+      lookupOut.textContent = b ? `${code} · ${b.slotId} · ${t.st[b.status] || b.status}` : t.notfound;
       lookupOut.className = b ? "status " + b.status : "err";
     });
 

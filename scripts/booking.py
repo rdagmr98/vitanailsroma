@@ -49,12 +49,30 @@ def occupied(bookings, slot_id):
     return any(b["slotId"] == slot_id and b["status"] in ("pending", "confirmed") for b in bookings)
 
 
+def write_public(bookings):
+    occupied_ids = sorted({b["slotId"] for b in bookings if b["status"] in ("pending", "confirmed")})
+    codes = {
+        b["code"]: {"status": b["status"], "slotId": b["slotId"]}
+        for b in bookings
+        if b["status"] in ("pending", "confirmed", "declined", "expired")
+    }
+    save("availability.json", {"occupied": occupied_ids, "codes": codes})
+
+
 def require_admin(p):
     admin = load("admin.json")
     if (p.get("adminId") or "") != admin["id"]:
         fail("auth")
     if sha256(p.get("password") or "") != admin["passwordSha256"]:
         fail("auth")
+
+
+def new_code(bookings, raw=""):
+    raw = (raw or "").strip().upper()
+    code = raw if re.match(r"^VN-[A-F0-9]{6}$", raw) else "VN-" + uuid.uuid4().hex[:6].upper()
+    if any(b["code"] == code for b in bookings):
+        fail("code")
+    return code
 
 
 def op_book(p):
@@ -73,10 +91,7 @@ def op_book(p):
         fail("busy")
     if occupied(data["bookings"], slot):
         fail("taken")
-    raw = (p.get("code") or "").strip().upper()
-    code = raw if re.match(r"^VN-[A-F0-9]{6}$", raw) else "VN-" + uuid.uuid4().hex[:6].upper()
-    if any(b["code"] == code for b in data["bookings"]):
-        fail("code")
+    code = new_code(data["bookings"], p.get("code"))
     data["bookings"].append({
         "id": code,
         "code": code,
@@ -85,9 +100,43 @@ def op_book(p):
         "name": name,
         "note": (p.get("note") or "")[:200],
         "status": "pending",
+        "source": "online",
         "createdAt": now().isoformat(),
     })
     save("bookings.json", data)
+    write_public(data["bookings"])
+    ok(code=code)
+
+
+def op_admin_book(p):
+    require_admin(p)
+    name = (p.get("name") or "").strip()
+    slot = p.get("slotId") or ""
+    svc = p.get("serviceId") or ""
+    if not name or len(name) > 80 or not SLOT_RE.match(slot):
+        fail("invalid")
+    services = {s["id"] for s in load("services.json")}
+    if svc not in services:
+        fail("service")
+    cfg = load("slots.json")
+    data = load("bookings.json")
+    expire_pending(data["bookings"], cfg.get("pendingHours", 48))
+    if occupied(data["bookings"], slot):
+        fail("taken")
+    code = new_code(data["bookings"], p.get("code"))
+    data["bookings"].append({
+        "id": code,
+        "code": code,
+        "slotId": slot,
+        "serviceId": svc,
+        "name": name,
+        "note": (p.get("note") or "")[:200],
+        "status": "confirmed",
+        "source": (p.get("source") or "voce")[:40],
+        "createdAt": now().isoformat(),
+    })
+    save("bookings.json", data)
+    write_public(data["bookings"])
     ok(code=code)
 
 
@@ -99,10 +148,11 @@ def op_accept(p):
     b = next((x for x in data["bookings"] if x["code"] == p.get("code")), None)
     if not b or b["status"] != "pending":
         fail("notfound")
-    if any(x["slotId"] == b["slotId"] and x["status"] == "confirmed" for x in data["bookings"]):
+    if any(x["slotId"] == b["slotId"] and x["status"] == "confirmed" and x["code"] != b["code"] for x in data["bookings"]):
         fail("taken")
     b["status"] = "confirmed"
     save("bookings.json", data)
+    write_public(data["bookings"])
     ok(code=b["code"])
 
 
@@ -114,6 +164,19 @@ def op_decline(p):
         fail("notfound")
     b["status"] = "declined"
     save("bookings.json", data)
+    write_public(data["bookings"])
+    ok(code=b["code"])
+
+
+def op_cancel(p):
+    require_admin(p)
+    data = load("bookings.json")
+    b = next((x for x in data["bookings"] if x["code"] == p.get("code")), None)
+    if not b or b["status"] not in ("pending", "confirmed"):
+        fail("notfound")
+    b["status"] = "cancelled"
+    save("bookings.json", data)
+    write_public(data["bookings"])
     ok(code=b["code"])
 
 
@@ -150,8 +213,10 @@ def op_update_slots(p):
 
 OPS = {
     "book": op_book,
+    "admin_book": op_admin_book,
     "accept": op_accept,
     "decline": op_decline,
+    "cancel": op_cancel,
     "change_password": op_change_password,
     "update_slots": op_update_slots,
 }
@@ -179,15 +244,22 @@ def selfcheck():
     data = load("bookings.json")
     assert data["bookings"][0]["status"] == "pending"
     code = data["bookings"][0]["code"]
+    pub = load("availability.json")
+    assert "2099-01-06T10:00" in pub["occupied"]
+    assert "name" not in json.dumps(pub)
     try:
         op_book({"name": "B", "slotId": "2099-01-06T10:00", "serviceId": "manicure"})
         raise SystemExit("lock failed")
     except SystemExit as e:
         if e.code != 1:
             raise
-    os.environ.pop("BOOKING_PAYLOAD", None)
     op_accept({"adminId": "vita", "password": "test-password-ok", "code": code})
     assert load("bookings.json")["bookings"][0]["status"] == "confirmed"
+    op_admin_book({
+        "adminId": "vita", "password": "test-password-ok",
+        "name": "Maria", "slotId": "2099-01-06T11:30", "serviceId": "pedicure", "source": "voce",
+    })
+    assert any(b["name"] == "Maria" and b["status"] == "confirmed" for b in load("bookings.json")["bookings"])
     shutil.rmtree(tmp)
     print("selfcheck ok")
 

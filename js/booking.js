@@ -30,10 +30,8 @@ async function dispatch(type, payload) {
   if (!r.ok) throw new Error("dispatch");
 }
 
-function expandSlots(cfg, bookings) {
-  const taken = new Set(
-    bookings.filter(b => b.status === "pending" || b.status === "confirmed").map(b => b.slotId)
-  );
+function expandSlots(cfg, occupied) {
+  const taken = new Set(occupied || []);
   const out = [];
   const start = new Date();
   for (let d = 0; d < cfg.weeksAhead * 7; d++) {
@@ -50,12 +48,12 @@ function expandSlots(cfg, bookings) {
   return out;
 }
 
-async function pollCode(code, tries = 20) {
+async function pollCode(code, tries = 24) {
   for (let i = 0; i < tries; i++) {
-    await new Promise(r => setTimeout(r, 3000));
-    const data = await loadJson("bookings.json");
-    const b = data.bookings.find(x => x.code === code);
-    if (b) return b;
+    await new Promise(r => setTimeout(r, 5000));
+    const av = await loadJson("availability.json");
+    const row = av.codes && av.codes[code];
+    if (row) return { code, ...row };
   }
   return null;
 }

@@ -22,11 +22,29 @@
       <input id="adminPw" type="password" autocomplete="current-password">
       <div class="row"><button type="button" class="btn btn-primary" id="loginBtn">Entra</button></div>
       <p class="err" id="loginErr" hidden>Id o password non validi.</p>
+      <p class="err" id="tokenHint" hidden>Manca il token in js/dispatch-token.js — senza quello non puoi salvare.</p>
     </div>
     <div id="app" hidden>
       <div class="card">
-        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">In attesa</h2>
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">In attesa (online)</h2>
         <div id="pending"></div>
+      </div>
+      <div class="card">
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Agenda (nomi e dettagli)</h2>
+        <div id="agenda"></div>
+      </div>
+      <div class="card">
+        <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Inserisci appuntamento (voce / IG / altro)</h2>
+        <p class="sub" style="margin-bottom:0.6rem">Confermato subito: tiene lo slot come occupato. Il pubblico vede solo “occupato”, non il nome.</p>
+        <label>Trattamento</label>
+        <select id="manService"></select>
+        <label>Slot libero</label>
+        <div class="slots" id="manSlots"></div>
+        <label>Nome cliente</label>
+        <input id="manName" maxlength="80">
+        <label>Nota / canale (es. voce, Instagram)</label>
+        <input id="manNote" maxlength="200" placeholder="voce">
+        <div class="row"><button type="button" class="btn btn-gold" id="manBook">Salva confermato</button></div>
       </div>
       <div class="card">
         <h2 style="font-family:Cormorant Garamond,serif;font-weight:400;margin-bottom:0.6rem;">Orari (JSON)</h2>
@@ -47,12 +65,18 @@
   <script src="js/booking.js"></script>
   <script>
     let cred = null;
+    let sel = "";
     const svcMap = {};
+    let services = [];
 
     function show(okTxt, errTxt) {
       msg.hidden = !okTxt; err.hidden = !errTxt;
       if (okTxt) msg.textContent = okTxt;
       if (errTxt) err.textContent = errTxt;
+    }
+
+    function fmt(d) {
+      return d.toLocaleString("it-IT", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
     }
 
     async function authOk(id, pw) {
@@ -62,40 +86,73 @@
     }
 
     async function refresh() {
-      const [data, services, slots] = await Promise.all([
+      const [data, svc, slots, av] = await Promise.all([
         VitaBook.loadJson("bookings.json"),
         VitaBook.loadJson("services.json"),
         VitaBook.loadJson("slots.json"),
+        VitaBook.loadJson("availability.json"),
       ]);
+      services = svc;
       services.forEach(s => { svcMap[s.id] = s.it; });
+      manService.innerHTML = services.map(s => `<option value="${s.id}">${s.it} ${s.price}</option>`).join("");
       slotsJson.value = JSON.stringify(slots, null, 2);
-      const list = data.bookings.filter(b => b.status === "pending");
-      pending.innerHTML = list.map(b =>
+
+      const pendingList = data.bookings.filter(b => b.status === "pending");
+      pending.innerHTML = pendingList.map(b =>
         `<div class="pending-item">
-          <div><code>${b.code}</code> · ${b.name}<br><small>${b.slotId} · ${svcMap[b.serviceId] || b.serviceId}</small></div>
+          <div><code>${b.code}</code> · <strong>${b.name}</strong><br>
+          <small>${b.slotId} · ${svcMap[b.serviceId] || b.serviceId}${b.note ? " · " + b.note : ""}</small></div>
           <div class="row">
             <button type="button" class="btn btn-gold" data-op="accept" data-code="${b.code}">Accetta</button>
             <button type="button" class="btn btn-danger" data-op="decline" data-code="${b.code}">Rifiuta</button>
           </div>
         </div>`
-      ).join("") || "<p>Nessuna richiesta.</p>";
-      document.querySelectorAll("[data-op]").forEach(btn => btn.addEventListener("click", () => decide(btn.dataset.op, btn.dataset.code)));
+      ).join("") || "<p>Nessuna richiesta online.</p>";
+
+      const active = data.bookings
+        .filter(b => b.status === "pending" || b.status === "confirmed")
+        .sort((a, b) => a.slotId.localeCompare(b.slotId));
+      agenda.innerHTML = active.map(b =>
+        `<div class="pending-item">
+          <div><code>${b.code}</code> · <strong>${b.name}</strong> · ${b.status}
+          ${b.source ? " · " + b.source : ""}<br>
+          <small>${b.slotId} · ${svcMap[b.serviceId] || b.serviceId}${b.note ? " · " + b.note : ""}</small></div>
+          <div class="row">
+            <button type="button" class="btn btn-danger" data-op="cancel" data-code="${b.code}">Annulla</button>
+          </div>
+        </div>`
+      ).join("") || "<p>Nessun appuntamento.</p>";
+
+      document.querySelectorAll("[data-op]").forEach(btn =>
+        btn.addEventListener("click", () => decide(btn.dataset.op, btn.dataset.code)));
+
+      const free = VitaBook.expandSlots(slots, av.occupied).filter(s => !s.taken);
+      manSlots.innerHTML = free.map(s =>
+        `<button type="button" class="slot${s.id === sel ? " sel" : ""}" data-id="${s.id}">
+          <span>${fmt(s.t)}</span><span>libero</span>
+        </button>`
+      ).join("") || "<p>Nessuno slot libero.</p>";
+      manSlots.querySelectorAll(".slot").forEach(btn => btn.addEventListener("click", () => {
+        sel = btn.dataset.id;
+        manSlots.querySelectorAll(".slot").forEach(x => x.classList.toggle("sel", x === btn));
+      }));
     }
 
     async function decide(op, code) {
       show("Invio...", "");
       try {
         await VitaBook.dispatch(op, { adminId: cred.id, password: cred.pw, code });
-        await new Promise(r => setTimeout(r, 12000));
-        show("Richiesta inviata. Se la lista non cambia, attendi e ricarica.", "");
+        await new Promise(r => setTimeout(r, 15000));
+        show("Inviato. Se non vedi il cambio, attendi e ricarica.", "");
         await refresh();
       } catch (e) {
-        show("", e.message === "notoken" ? "Manca il token dispatch. Vedi nota Obsidian." : "Invio fallito.");
+        show("", e.message === "notoken" ? "Manca token in js/dispatch-token.js" : "Invio fallito.");
       }
     }
 
     loginBtn.addEventListener("click", async () => {
       loginErr.hidden = true;
+      tokenHint.hidden = !!window.VITA_DISPATCH_TOKEN;
       const id = adminId.value.trim();
       const pw = adminPw.value;
       if (!(await authOk(id, pw))) { loginErr.hidden = false; return; }
@@ -103,6 +160,27 @@
       loginCard.hidden = true;
       app.hidden = false;
       await refresh();
+    });
+
+    manBook.addEventListener("click", async () => {
+      const name = manName.value.trim();
+      if (!sel || !name) { show("", "Nome e slot obbligatori."); return; }
+      show("Invio appuntamento...", "");
+      try {
+        await VitaBook.dispatch("admin_book", {
+          adminId: cred.id, password: cred.pw,
+          name, slotId: sel, serviceId: manService.value,
+          note: manNote.value.trim(),
+          source: manNote.value.trim() || "voce",
+        });
+        sel = "";
+        manName.value = "";
+        await new Promise(r => setTimeout(r, 15000));
+        show("Appuntamento inviato. Controlla l'agenda.", "");
+        await refresh();
+      } catch (e) {
+        show("", e.message === "notoken" ? "Manca token." : "Invio fallito (slot preso?).");
+      }
     });
 
     saveSlots.addEventListener("click", async () => {
@@ -121,7 +199,7 @@
       try {
         await VitaBook.dispatch("change_password", { adminId: cred.id, password: cred.pw, newPassword: n });
         cred.pw = n;
-        show("Password inviata. Dal prossimo accesso usa la nuova. Cambiala anche tu a memoria.", "");
+        show("Password aggiornata (dopo il push dell'Action).", "");
       } catch {
         show("", "Invio fallito.");
       }
