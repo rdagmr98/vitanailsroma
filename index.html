@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Vita Nails Roma — nail studio a Roma: manicure russa, onicotecnica, pedicure e podologia. Prenota su Instagram @vita_nails_roma.">
-  <meta name="keywords" content="manicure roma, unghie roma, manicure russa roma, pedicure roma, onicotecnica roma, nail studio roma, podologia roma, semipermanente roma">
+  <meta name="keywords" content="manicure roma, nails roma, unghie roma, manicure russa roma, pedicure roma, onicotecnica roma, nail studio roma, podologia roma, semipermanente roma">
   <meta name="author" content="Vita Nails Roma">
   <link rel="canonical" href="https://rdagmr98.github.io/vitanailsroma/">
   <title>Vita Nails Roma — Manicure Russa, Onicotecnica &amp; Pedicure a Roma</title>
@@ -15,6 +15,7 @@
   <meta property="og:image" content="https://rdagmr98.github.io/vitanailsroma/vita-nails-media/749609303_18370632529225148_6795570188286259978_n.jpg">
   <meta property="og:locale" content="it_IT">
   <meta property="og:locale:alternate" content="ru_RU">
+  <meta property="og:site_name" content="Vita Nails Roma">
   <meta name="twitter:card" content="summary_large_image">
   <script type="application/ld+json">
   {
@@ -27,7 +28,14 @@
     "address": { "@type": "PostalAddress", "addressLocality": "Roma", "addressRegion": "Lazio", "addressCountry": "IT" },
     "sameAs": ["https://www.instagram.com/vita_nails_roma/", "https://www.threads.com/@vita_nails_roma"],
     "priceRange": "€€",
-    "knowsAbout": ["manicure russa", "pedicure", "onicotecnica", "podologia", "semipermanente"]
+    "areaServed": "Roma",
+    "knowsAbout": ["manicure russa", "pedicure", "onicotecnica", "podologia", "semipermanente", "unghie roma", "nail studio roma"],
+    "makesOffer": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Manicure russa" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Pedicure" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Onicotecnica" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Podologia" } }
+    ]
   }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -353,11 +361,17 @@
       .nav-links.open { transform: none; }
       .menu-toggle { display: grid; }
       .hero-grid, .about-grid, .cards, .price-cols, .corsi-box, .contact-grid, .footer-grid { grid-template-columns: 1fr; }
-      .stack-3d { height: 400px; order: -1; margin-bottom: 5rem; }
-      .p3 { left: 50%; margin-left: -60px; bottom: 10%; }
+      .stack-3d {
+        order: -1; height: auto; display: flex; flex-direction: column; align-items: center;
+        perspective: none;
+      }
+      .polaroid { position: relative; animation: none; }
+      .p1 { width: min(280px, 82%); height: 280px; align-self: flex-end; right: auto; top: auto; }
+      .p2 { width: min(230px, 70%); height: 200px; margin-top: -80px; align-self: flex-start; left: auto; bottom: auto; }
+      .p3 { width: 96px; height: 96px; margin-top: -24px; left: auto; bottom: auto; align-self: center; }
       .badge-3d {
-        right: auto; left: 50%; transform: translateX(-50%);
-        bottom: -4.2rem; animation: none; max-width: min(280px, 92%);
+        position: relative; right: auto; bottom: auto; max-width: none; width: 100%;
+        margin-top: 1rem; animation: none;
       }
       .form-row { grid-template-columns: 1fr; }
       .carousel-wrap { height: min(460px, 68vh); }
@@ -493,7 +507,10 @@
         <h2 data-i18n="seo.title">Manicure Roma, unghie Roma, nails Roma</h2>
         <p data-i18n="seo.p1">Studio nails a Roma: manicure Roma e unghie Roma con tecnica russa, pedicure e podologia. Nails Roma in studio, non solo dal feed.</p>
         <p data-i18n="seo.p2">Manicure russa Roma è il lavoro principale: cuticola, forma, semipermanente. Prenota online o in Direct.</p>
-        <p><a href="manicure-roma.html" data-i18n="seo.more">Manicure Roma — pagina dedicata</a></p>
+        <p><a href="manicure-roma.html" data-i18n="seo.more">Manicure Roma — pagina dedicata</a>
+          · <a href="unghie-roma.html" data-i18n="seo.more2">Unghie Roma</a>
+          · <a href="nails-roma.html" data-i18n="seo.more3">Nails Roma</a>
+          · <a href="manicure-russa-roma.html" data-i18n="seo.more4">Manicure russa Roma</a></p>
       </div>
     </section>
 
@@ -624,6 +641,9 @@
               <li><a href="#corsi" data-i18n="nav.courses">Corsi</a></li>
               <li><a href="prenota.html" data-i18n="nav.bookOnline">Prenota online</a></li>
               <li><a href="manicure-roma.html">Manicure Roma</a></li>
+              <li><a href="unghie-roma.html">Unghie Roma</a></li>
+              <li><a href="nails-roma.html">Nails Roma</a></li>
+              <li><a href="manicure-russa-roma.html">Manicure russa Roma</a></li>
             </ul>
           </div>
           <div class="footer-col">
@@ -639,8 +659,8 @@
           <span data-i18n="footer.photos">Foto da @vita_nails_roma</span>
         </div>
         <p class="footer-credit">
-          <span data-i18n="footer.credit">Realizzato da</span>
-          <a href="https://www.instagram.com/notasknnyb_tch/" target="_blank" rel="noopener">Gianmarco</a>
+          <span data-i18n="footer.credit">Realizzato da</span> Gianmarco
+          · <a href="https://www.instagram.com/notasknnyb_tch/" target="_blank" rel="noopener">@notasknnyb_tch</a>
           · <a href="mailto:osare199@gmail.com">osare199@gmail.com</a>
         </p>
       </div>
@@ -651,7 +671,7 @@
   <script>
     const T = {
       it: {
-        nav: { about: 'Chi sono', services: 'Trattamenti', portfolio: 'Lavori', prices: 'Listino', courses: 'Corsi', book: 'Direct', bookOnline: 'Prenota online' },
+        nav: { about: 'Chi sono', services: 'Trattamenti', portfolio: 'Lavori', prices: 'Listino', courses: 'Corsi', book: 'Prenota', bookOnline: 'Prenota online' },
         hero: {
           eyebrow: 'Onicotecnica · Roma · @vita_nails_roma',
           title: 'Manicure russa, dettagli che <em>restano</em>',
@@ -677,7 +697,12 @@
           title: 'Manicure Roma, unghie Roma, nails Roma',
           p1: 'Studio nails a Roma: manicure Roma e unghie Roma con tecnica russa, pedicure e podologia. Nails Roma in studio, non solo dal feed.',
           p2: 'Manicure russa Roma è il lavoro principale: cuticola, forma, semipermanente. Prenota online o in Direct.',
-          more: 'Manicure Roma — pagina dedicata'
+          more: 'Manicure Roma — pagina dedicata',
+          more2: 'Unghie Roma', more3: 'Nails Roma', more4: 'Manicure russa Roma'
+        },
+        seoMeta: {
+          title: 'Vita Nails Roma — Manicure Russa, Onicotecnica & Pedicure a Roma',
+          desc: 'Nail studio a Roma: manicure russa, onicotecnica, pedicure e podologia. Prenota su Instagram @vita_nails_roma.'
         },
         portfolio: { eyebrow: 'Portfolio', title: 'Dal mio Instagram', sub: 'Lavori reali di @vita_nails_roma — scorri o trascina il carosello 3D.' },
         prices: {
@@ -725,7 +750,7 @@
         aria: { menu: 'Apri menu', prev: 'Precedente', next: 'Successivo' }
       },
       ru: {
-        nav: { about: 'Обо мне', services: 'Услуги', portfolio: 'Работы', prices: 'Прайс', courses: 'Курсы', book: 'Direct', bookOnline: 'Онлайн-запись' },
+        nav: { about: 'Обо мне', services: 'Услуги', portfolio: 'Работы', prices: 'Прайс', courses: 'Курсы', book: 'Запись', bookOnline: 'Онлайн-запись' },
         hero: {
           eyebrow: 'Оникотехника · Рим · @vita_nails_roma',
           title: 'Русский маникюр, детали, которые <em>остаются</em>',
@@ -751,7 +776,12 @@
           title: 'Маникюр Рим, ногти Рим, nails Roma',
           p1: 'Nail studio в Риме: manicure Roma и unghie Roma, русская техника, педикюр и подология.',
           p2: 'Маникюр русская техника в Риме — основная работа студии. Запись онлайн или в Direct.',
-          more: 'Manicure Roma — отдельная страница'
+          more: 'Manicure Roma — отдельная страница',
+          more2: 'Unghie Roma', more3: 'Nails Roma', more4: 'Manicure russa Roma'
+        },
+        seoMeta: {
+          title: 'Vita Nails Roma — Русский маникюр, оникотехника и педикюр в Риме',
+          desc: 'Nail studio в Риме: русский маникюр, оникотехника, педикюр и подология. Запись @vita_nails_roma.'
         },
         portfolio: { eyebrow: 'Портфолио', title: 'Из моего Instagram', sub: 'Реальные работы @vita_nails_roma — листайте или перетаскивайте 3D-карусель.' },
         prices: {
@@ -828,7 +858,13 @@
       const cur = sel.value;
       sel.innerHTML = T[lang].form.services.map(s => `<option>${s}</option>`).join('');
       if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+      document.title = T[lang].seoMeta.title;
+      document.querySelector('meta[name="description"]').setAttribute('content', T[lang].seoMeta.desc);
+      document.querySelector('meta[property="og:title"]').setAttribute('content', T[lang].seoMeta.title);
+      document.querySelector('meta[property="og:description"]').setAttribute('content', T[lang].seoMeta.desc);
+      document.querySelector('meta[property="og:locale"]').setAttribute('content', lang === 'ru' ? 'ru_RU' : 'it_IT');
       updateCarouselCaptions();
+      fillIgPreview(false);
     }
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -881,19 +917,29 @@
     const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('visible')), { threshold: 0.12 });
     document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
 
+    function fillIgPreview(copy) {
+      const nome = document.getElementById('nome').value.trim();
+      if (!nome) return;
+      const text = T[lang].form.msgTemplate(
+        nome,
+        document.getElementById('servizio').value,
+        document.getElementById('msg').value.trim()
+      );
+      document.getElementById('msgPreviewText').textContent = text;
+      document.getElementById('msgPreview').hidden = false;
+      if (copy) return navigator.clipboard.writeText(text);
+    }
+
     document.getElementById('contactForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const nome = document.getElementById('nome').value.trim();
-      const trattamento = document.getElementById('servizio').value;
-      const extra = document.getElementById('msg').value.trim();
-      const text = T[lang].form.msgTemplate(nome, trattamento, extra);
-      const preview = document.getElementById('msgPreview');
-      const previewText = document.getElementById('msgPreviewText');
-      previewText.textContent = text;
-      preview.hidden = false;
-      try { await navigator.clipboard.writeText(text); } catch { /* ponytail: fallback = visible box */ }
+      try { await fillIgPreview(true); } catch { /* ponytail: box stays visible */ }
       showToast(t('form.toastCopied'));
       window.open('https://ig.me/m/vita_nails_roma', '_blank', 'noopener');
+    });
+
+    ['nome', 'servizio', 'msg'].forEach(id => {
+      document.getElementById(id).addEventListener('input', () => fillIgPreview(false));
+      document.getElementById(id).addEventListener('change', () => fillIgPreview(false));
     });
 
     document.getElementById('copyAgain').addEventListener('click', async () => {

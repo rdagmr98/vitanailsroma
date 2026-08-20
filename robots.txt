@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
 
 Sitemap: https://rdagmr98.github.io/vitanailsroma/sitemap.xml
