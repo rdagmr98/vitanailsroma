@@ -39,13 +39,17 @@ jobs:
       - name: Stage site
         run: |
           mkdir -p _site/js _site/css _site/data
-          cp -f index.html prenota.html admin.html sitemap.xml robots.txt _site/ 2>/dev/null || true
-          cp -f *.html _site/ 2>/dev/null || true
+          cp -f *.html sitemap.xml robots.txt _site/ 2>/dev/null || true
           cp -rf css/. _site/css/
           cp -rf js/. _site/js/
           cp -rf data/. _site/data/
+          # Site images live here (not media/)
+          if [ -d vita-nails-media ]; then cp -rf vita-nails-media _site/; fi
           if [ -d media ]; then cp -rf media _site/; fi
           if [ -d assets ]; then cp -rf assets _site/; fi
+          ls -la _site
+          test -d _site/vita-nails-media
+          test -n "$(ls -A _site/vita-nails-media | head -1)"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
