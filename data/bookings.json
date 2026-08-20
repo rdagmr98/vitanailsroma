@@ -7,7 +7,7 @@
       "serviceId": "manicure",
       "name": "Test",
       "note": "auto",
-      "status": "pending",
+      "status": "declined",
       "source": "online",
       "createdAt": "2026-08-20T12:04:02.636Z"
     }
