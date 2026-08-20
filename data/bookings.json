@@ -40,7 +40,7 @@
       "serviceId": "promo",
       "name": "Test Agent",
       "note": "",
-      "status": "pending",
+      "status": "cancelled",
       "source": "online",
       "createdAt": "2026-08-20T12:19:41.684Z"
     }
