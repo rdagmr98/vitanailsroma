@@ -1,4 +1,25 @@
 {
-  "occupied": [],
-  "codes": {}
+  "occupied": [
+    "2026-08-20T16:30",
+    "2026-08-21T11:30",
+    "2026-09-02T10:00"
+  ],
+  "codes": {
+    "VN-F60AB7": {
+      "status": "declined",
+      "slotId": "2026-08-20T15:00"
+    },
+    "VN-033B37": {
+      "status": "confirmed",
+      "slotId": "2026-08-20T16:30"
+    },
+    "VN-467CF6": {
+      "status": "confirmed",
+      "slotId": "2026-09-02T10:00"
+    },
+    "VN-9619A3": {
+      "status": "pending",
+      "slotId": "2026-08-21T11:30"
+    }
+  }
 }
