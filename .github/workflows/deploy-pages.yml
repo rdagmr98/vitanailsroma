@@ -39,7 +39,9 @@ jobs:
       - name: Stage site
         run: |
           mkdir -p _site/js _site/css _site/data
-          cp -f *.html sitemap.xml robots.txt _site/ 2>/dev/null || true
+          cp -f *.html sitemap.xml robots.txt favicon.svg _site/ 2>/dev/null || true
+          # IndexNow / Search Console verification files in root
+          cp -f *.txt google*.html _site/ 2>/dev/null || true
           cp -rf css/. _site/css/
           cp -rf js/. _site/js/
           cp -rf data/. _site/data/
