@@ -39,7 +39,7 @@ jobs:
       - name: Stage site
         run: |
           mkdir -p _site/js _site/css _site/data
-          cp -f *.html sitemap.xml robots.txt favicon.svg _site/ 2>/dev/null || true
+          cp -f *.html sitemap.xml robots.txt favicon.svg favicon.png apple-touch-icon.png _site/ 2>/dev/null || true
           # IndexNow / Search Console verification files in root
           cp -f *.txt google*.html _site/ 2>/dev/null || true
           cp -rf css/. _site/css/
