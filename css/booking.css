@@ -72,6 +72,9 @@ code { background: #fff; padding: 0.1rem 0.35rem; border-radius: 6px; }
 .svc-row { display: grid; grid-template-columns: 1fr 70px 70px; gap: 0.4rem; align-items: center; margin: 0.35rem 0; }
 .svc-row input { padding: 0.45rem 0.55rem; font-size: 0.85rem; }
 @media (max-width: 720px) {
-  .cal-week { grid-template-columns: 1fr; }
-  .cal-day.empty, .cal-day.muted { display: none; }
+  .cal-week { gap: 0.25rem; }
+  .cal-day { padding: 0.3rem; min-height: 4rem; }
+  .cal-day-h { font-size: 0.62rem; }
+  .cal-day-h strong { font-size: 0.85rem; }
+  .cal-slot { padding: 0.28rem 0.12rem; font-size: 0.68rem; }
 }

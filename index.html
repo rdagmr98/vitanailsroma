@@ -125,7 +125,9 @@
       color: var(--ink-soft); transition: color var(--transition);
     }
     .nav-links a:hover { color: var(--ink); }
-    .nav-right { display: flex; align-items: center; gap: 0.75rem; }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; position: relative; z-index: 2; }
+    .nav-book { display: none; }
+    .nav-admin { display: none; }
     .lang-toggle { display: flex; gap: 0.2rem; }
     .lang-btn {
       padding: 0.32rem 0.55rem; border: 1.5px solid rgba(44,38,36,0.15);
@@ -374,12 +376,23 @@
 
     @media (max-width: 900px) {
       .nav-links {
-        position: fixed; inset: 0; background: rgba(247,241,234,0.98);
+        position: fixed; inset: 0; z-index: 1; background: rgba(247,241,234,0.98);
         flex-direction: column; justify-content: center; gap: 1.6rem;
         transform: translateX(100%); transition: transform var(--transition);
       }
       .nav-links.open { transform: none; }
       .menu-toggle { display: grid; }
+      .nav-book {
+        display: inline-flex; padding: 0.45rem 0.95rem; font-size: 0.78rem;
+      }
+      .nav-admin {
+        display: block; position: absolute; bottom: 1.6rem; left: 0; right: 0; text-align: center;
+      }
+      .nav-admin a {
+        font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase;
+        color: rgba(44, 38, 36, 0.35);
+      }
+      .nav-admin a:hover { color: var(--ink-soft); }
       .hero-grid, .about-grid, .cards, .price-cols, .corsi-box, .contact-grid, .footer-grid { grid-template-columns: 1fr; }
       .stack-3d {
         order: -1; height: auto; display: flex; flex-direction: column; align-items: center;
@@ -413,6 +426,7 @@
             <button type="button" class="lang-btn active" data-lang="it">IT</button>
             <button type="button" class="lang-btn" data-lang="ru">RU</button>
           </div>
+          <a class="btn btn-primary nav-book" href="prenota.html" data-i18n="nav.bookOnline">Prenota online</a>
           <button class="menu-toggle" id="menuToggle" aria-label="Apri menu"><span></span></button>
         </div>
         <ul class="nav-links" id="navLinks">
@@ -423,6 +437,7 @@
           <li><a href="#corsi" data-i18n="nav.courses">Corsi</a></li>
           <li><a href="prenota.html" data-i18n="nav.bookOnline">Prenota online</a></li>
           <li><a href="#contatti" class="btn btn-primary" data-i18n="nav.book">Prenota</a></li>
+          <li class="nav-admin"><a href="admin.html">Admin</a></li>
         </ul>
       </div>
     </header>
