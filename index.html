@@ -108,15 +108,15 @@
     .toast.show { transform: translateX(-50%) translateY(0); }
 
     header {
-      position: fixed; inset: 0 0 auto 0; z-index: 100; padding: 1.15rem 0;
+      position: fixed; inset: 0 0 auto 0; z-index: 300; padding: 1.15rem 0;
       transition: background var(--transition), padding var(--transition), box-shadow var(--transition);
     }
     header.scrolled {
-      background: rgba(247, 241, 234, 0.88);
-      backdrop-filter: blur(16px);
+      background: rgba(247, 241, 234, 0.97);
       box-shadow: 0 1px 0 rgba(44, 38, 36, 0.06);
       padding: 0.75rem 0;
     }
+    body.menu-open { overflow: hidden; }
     .nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
     .logo { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; font-weight: 600; }
     .logo span { color: var(--rose); font-style: italic; font-weight: 400; }
@@ -126,7 +126,7 @@
       color: var(--ink-soft); transition: color var(--transition);
     }
     .nav-links a:hover { color: var(--ink); }
-    .nav-right { display: flex; align-items: center; gap: 0.75rem; position: relative; z-index: 2; }
+    .nav-right { display: flex; align-items: center; gap: 0.75rem; position: relative; z-index: 310; }
     .nav-book { display: none; }
     .nav-admin { display: none; }
     .lang-toggle { display: flex; gap: 0.2rem; }
@@ -398,23 +398,32 @@
       }
       .nav-links {
         position: fixed;
-        inset: 0;
-        z-index: 250;
-        background: rgba(247, 241, 234, 0.985);
-        backdrop-filter: blur(8px);
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        z-index: 290;
+        margin: 0;
+        padding: 5.5rem 1.5rem 2rem;
+        background: #f7f1ea;
         flex-direction: column;
         justify-content: center;
-        gap: 1.6rem;
+        align-items: center;
+        gap: 1.4rem;
         transform: translateX(100%);
-        opacity: 0;
         pointer-events: none;
-        transition: transform var(--transition), opacity var(--transition);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        transition: transform 0.3s ease;
       }
       .nav-links.open {
         transform: translateX(0);
-        opacity: 1;
         pointer-events: auto;
       }
+      .nav-links a { font-size: 1.15rem; color: var(--ink); }
       .menu-toggle { display: grid; }
       .nav-book {
         display: inline-flex;
@@ -979,14 +988,13 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => toast.classList.remove('show'), 5000);
     }
-    menuToggle.addEventListener('click', () => {
-      menuToggle.classList.toggle('open');
-      navLinks.classList.toggle('open');
-    });
-    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-      menuToggle.classList.remove('open');
-      navLinks.classList.remove('open');
-    }));
+    function setMenuOpen(open) {
+      menuToggle.classList.toggle('open', open);
+      navLinks.classList.toggle('open', open);
+      document.body.classList.toggle('menu-open', open);
+    }
+    menuToggle.addEventListener('click', () => setMenuOpen(!navLinks.classList.contains('open')));
+    navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenuOpen(false)));
 
     document.querySelectorAll('[data-tilt]').forEach(wrap => {
       wrap.addEventListener('mousemove', e => {
