@@ -376,15 +376,62 @@
     .fade-in.visible { opacity: 1; transform: none; }
 
     @media (max-width: 900px) {
-      .nav-links {
-        position: fixed; inset: 0; z-index: 1; background: rgba(247,241,234,0.98);
-        flex-direction: column; justify-content: center; gap: 1.6rem;
-        transform: translateX(100%); transition: transform var(--transition);
+      header { padding: 0.65rem 0; }
+      header.scrolled { padding: 0.55rem 0; }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
       }
-      .nav-links.open { transform: none; }
+      .logo { font-size: 1.7rem; line-height: 1; }
+      .nav-right {
+        gap: 0.45rem;
+        align-items: center;
+        justify-content: flex-end;
+      }
+      .lang-toggle { gap: 0.25rem; }
+      .lang-btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.68rem;
+        border-radius: 8px;
+      }
+      .nav-links {
+        position: fixed;
+        inset: 0;
+        z-index: 250;
+        background: rgba(247, 241, 234, 0.985);
+        backdrop-filter: blur(8px);
+        flex-direction: column;
+        justify-content: center;
+        gap: 1.6rem;
+        transform: translateX(100%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform var(--transition), opacity var(--transition);
+      }
+      .nav-links.open {
+        transform: translateX(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
       .menu-toggle { display: grid; }
       .nav-book {
-        display: inline-flex; padding: 0.45rem 0.95rem; font-size: 0.78rem;
+        display: inline-flex;
+        padding: 0.42rem 0.85rem;
+        font-size: 0.72rem;
+        line-height: 1.15;
+        text-align: center;
+        white-space: normal;
+        max-width: 96px;
+        min-height: 36px;
+      }
+      .menu-toggle {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        border: 1px solid rgba(44, 38, 36, 0.14);
+        background: rgba(255, 250, 245, 0.78);
       }
       .nav-admin {
         display: block; position: absolute; bottom: 1.6rem; left: 0; right: 0; text-align: center;
@@ -395,6 +442,7 @@
       }
       .nav-admin a:hover { color: var(--ink-soft); }
       .hero-grid, .about-grid, .cards, .price-cols, .corsi-box, .contact-grid, .footer-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 8.5rem; }
       .stack-3d {
         order: -1; height: auto; display: flex; flex-direction: column; align-items: center;
         perspective: none;
