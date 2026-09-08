@@ -43,6 +43,18 @@
       "status": "cancelled",
       "source": "online",
       "createdAt": "2026-08-20T12:19:41.684Z"
+    },
+    {
+      "id": "VN-0B8C4E",
+      "code": "VN-0B8C4E",
+      "slotId": "2026-09-08T15:00",
+      "serviceId": "promo",
+      "name": "Elena Wisd",
+      "duration": 75,
+      "note": "Маникюр гель",
+      "status": "pending",
+      "source": "online",
+      "createdAt": "2026-09-08T09:22:40.336Z"
     }
   ]
 }
