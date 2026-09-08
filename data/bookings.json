@@ -55,6 +55,18 @@
       "status": "pending",
       "source": "online",
       "createdAt": "2026-09-08T09:22:40.336Z"
+    },
+    {
+      "id": "VN-3C5F8A",
+      "code": "VN-3C5F8A",
+      "slotId": "2026-09-08T16:30",
+      "serviceId": "promo",
+      "name": "Elena Wisd",
+      "duration": 75,
+      "note": "Маникюр гель",
+      "status": "pending",
+      "source": "online",
+      "createdAt": "2026-09-08T09:23:12.385Z"
     }
   ]
 }
