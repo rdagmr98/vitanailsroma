@@ -51,9 +51,11 @@ code { background: #fff; padding: 0.1rem 0.35rem; border-radius: 6px; }
 .cal-day-head b, .cal-day-h strong { display: block; font-size: 1rem; font-weight: 500; color: var(--ink); text-transform: none; letter-spacing: 0; }
 .cal-appt .meta, .cal-appt .cal-meta { color: var(--ink-soft); }
 .cal-slot {
-  display: block; width: 100%; padding: 0.35rem 0.4rem; border-radius: 8px;
+  display: block; width: 100%; padding: 0.4rem 0.2rem; border-radius: 999px;
   border: 1.5px solid rgba(44,38,36,0.1); background: #fff; cursor: pointer;
-  font: 500 0.78rem Outfit, sans-serif; text-align: center; color: var(--ink);
+  font: 500 0.72rem/1.2 Outfit, sans-serif; text-align: center; color: var(--ink);
+  white-space: nowrap; font-variant-numeric: tabular-nums; letter-spacing: -0.02em;
+  overflow: hidden; box-sizing: border-box;
 }
 .cal-slot:disabled { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
 .cal-slot.sel { border-color: var(--gold); background: #fff8ea; }
@@ -72,9 +74,9 @@ code { background: #fff; padding: 0.1rem 0.35rem; border-radius: 6px; }
 .svc-row { display: grid; grid-template-columns: 1fr 70px 70px; gap: 0.4rem; align-items: center; margin: 0.35rem 0; }
 .svc-row input { padding: 0.45rem 0.55rem; font-size: 0.85rem; }
 @media (max-width: 720px) {
-  .cal-week { gap: 0.25rem; }
-  .cal-day { padding: 0.3rem; min-height: 4rem; }
-  .cal-day-h { font-size: 0.62rem; }
-  .cal-day-h strong { font-size: 0.85rem; }
-  .cal-slot { padding: 0.28rem 0.12rem; font-size: 0.68rem; }
+  .cal-week { gap: 0.2rem; }
+  .cal-day { padding: 0.25rem 0.15rem; min-height: 4rem; }
+  .cal-day-h { font-size: 0.58rem; }
+  .cal-day-h strong { font-size: 0.8rem; }
+  .cal-slot { padding: 0.32rem 0.05rem; font-size: 0.62rem; letter-spacing: -0.04em; }
 }
